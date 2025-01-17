@@ -1,6 +1,8 @@
 import React from 'react';
 import HSI_logo from '../assets/HSI_logo.png'
-import FGCU_logo from '../assets/FGCU_logo.jpg'
+import FGCU_logo from '../assets/FGCU_logo.png'
+import PlusAdd from '../assets/PlusAdd.png'
+import DeckOfCards from '../assets/DeckofCards.png'
 
 const Sidebar = ({ activeTab }) => {
   return (
@@ -9,8 +11,14 @@ const Sidebar = ({ activeTab }) => {
         <div>
           <input type="text" className="search-bar" placeholder="Search cards" />
           <div className="button-container">
-            <button className="new-card-button">New Card</button>
-            <button className="new-deck-button">New Deck</button>
+            <button className="new-card-button">
+              <img alt="add image" className='plus_sign' src={PlusAdd} />
+              New Card
+              </button>
+            <button className="new-deck-button">
+            <img alt="deck of cards" className='deck_of_cards' src={DeckOfCards} />
+              New Deck
+              </button>
           </div>
           <div className="logo-container">
             <img alt="hsi logo" className='logo' src={HSI_logo} />

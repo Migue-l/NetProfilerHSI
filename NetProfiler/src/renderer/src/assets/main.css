@@ -74,16 +74,20 @@
   transform: translateY(2px);
 }
 
+/* tab content */
+
+
 /* sidebar */
 .sidebar {
   width: 360px;
   background-color: #ececec;
-  padding: 30px 30px;
+  padding: 30px;
   border-right: 1px solid #dadada;
-  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05); 
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
-  gap: 15px; 
+  justify-content: space-between;
+  height: 100vh;
 }
 
 /* sidebar items */
@@ -163,11 +167,10 @@
 .logo-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  margin-top: 180px;
   gap: 40px;
   padding: 20px;
+  margin-bottom: 10%;
 }
 
 /* sidebar logos */

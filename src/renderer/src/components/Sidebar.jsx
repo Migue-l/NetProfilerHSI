@@ -2,10 +2,10 @@ import React from 'react';
 import HSI_logo from '../assets/HSI_logo.png'
 import FGCU_logo from '../assets/FGCU_logo.jpg'
 
-
 const Sidebar = ({ activeTab, setServerResponse }) => {
   const handleNewCard = async () => {
     try {
+      // Check for server response, assign to local var
       const response = await fetch('http://127.0.0.1:5000/api/new-card', {
         method: 'POST',
         headers: {
@@ -27,6 +27,7 @@ const Sidebar = ({ activeTab, setServerResponse }) => {
       // Update the server response state
       setServerResponse(data.message); // For example, display the "message" field
     } catch (error) {
+      // Debug code: Err not visible during normal operation
       console.error('Error creating new card:', error);
       setServerResponse('Error creating new card.'); // Display error message
     }

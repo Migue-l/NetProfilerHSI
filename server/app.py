@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from waitress import serve
+#from waitress import serve
 
 # Create 'main' app obj
 app = Flask(__name__)

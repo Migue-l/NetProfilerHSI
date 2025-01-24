@@ -6,10 +6,11 @@
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+      content="script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
     />
   </head>
-
+  <!--  connect-src 'self' http://127.0.0.1:5000; May be a port routing problem in the future  -->
+  <!-- default-src 'self'; this will automatically make the port of 5173 -->
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>

@@ -27,7 +27,7 @@ def newCard():
         "createdAt": created_at
     }), 201  # 201 Created status code
 
-@app.route('/api/csv-test', methods=['POST'])
+@app.route('/api/csv-test', methods=['GET'])
 def get_csv_data():
     try:
         df = pd.read_csv('test.csv')

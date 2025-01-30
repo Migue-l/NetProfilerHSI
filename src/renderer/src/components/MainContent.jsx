@@ -13,10 +13,19 @@ const MainContent = ({activeTab}) => {
         }
       });
 
+      // Debug code
+      console.log('Response Status:', response.status);
+      console.log('Response Headers:', response.headers);
+
       // Checks for HTTP error
       if (!response.ok) {
+        // Read full error message from Flask
+        const errorText = await response.text();  
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
+      
+      // Debug code
+      console.log('HTTP Response OK');
 
       const data = await response.json();
       console.log('Fetched csv data:', data);

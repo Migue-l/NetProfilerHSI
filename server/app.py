@@ -7,7 +7,7 @@ import os
 
 # Create 'main' app obj
 app = Flask(__name__)
-# Enable debug mode
+# Enable Flask debug mode
 app.config['DEBUG'] = True
 CORS(app)
 

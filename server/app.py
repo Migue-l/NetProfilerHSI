@@ -31,8 +31,13 @@ def newCard():
 def get_csv_data():
     try:
         df = pd.read_csv('test.csv')
-        # Convert DataFrame to a dictionary (JSON-friendly format)
-        data = df.to_dict(orient='split')
+        # Convert DataFrame to more JSON-friendly dict
+        data = {
+            # list() converts column indexes into python list
+            "columns" : list(df.columns),
+            # to_list() converts numpy arr into list of lists
+            "data" : df.values.to_list()
+        }
         # Send json response to the front-end
         return jsonify(data)
     except Exception as e:
@@ -56,7 +61,7 @@ def post_server_data():
         return jsonify({"message": "CSV data successfully updated"}), 200
     # Send error if the returned json fails to be processed by server
     except Exception as e:
-        return jsonify({"error": f"Error processing the data: {str(e)}"}), 500
+        return jsonify({"Server Error": f"Error processing the data: {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000)

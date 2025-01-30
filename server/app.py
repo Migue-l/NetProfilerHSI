@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import pandas as pd
 import numpy as np
+import os
 #from waitress import serve
 
 # Create 'main' app obj
@@ -30,6 +31,16 @@ def newCard():
 @app.route('/api/csv-test', methods=['GET'])
 def get_csv_data():
     try:
+        # Check if file exists before reading
+        if not os.path.exists('test.csv'):
+            return jsonify({"Read Error": "File test.csv not found"}), 500
+        
+        # Check if Python has permission to read test csv
+        if not os.access('test.csv', os.R_OK):
+            return jsonify({"Read Error": "Python lacks read permissions for test.csv"}), 500
+        else:
+            print("Success: Flask can read the file.")
+        
         df = pd.read_csv('test.csv')
         # Convert DataFrame to more JSON-friendly dict
         data = {
@@ -41,6 +52,7 @@ def get_csv_data():
         # Send json response to the front-end
         return jsonify(data)
     except Exception as e:
+        print(f"Error reading CSV: {e}")
         # Code 500 is an HTML server error 
         return jsonify({"Server Error": f"Failed to read CSV file: {str(e)}"}), 500
 

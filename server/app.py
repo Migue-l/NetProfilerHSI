@@ -69,7 +69,7 @@ def get_csv_data():
 
 
 @app.route('/api/csv-test', methods=['POST'])
-def post_server_data():
+def post_csv_data():
     try:
         # Parse the incoming JSON data returning from the front end
         data = request.get_json()

@@ -6,7 +6,7 @@ import useServerResponse from '../../hooks/useServerResponse'
 
 function App() {
   const [activeTab, setActiveTab] = useState('My Cards');
-  // New card state tuple declared here bc it is accessed by MainContent.jsx & Sidebar.jsx
+  // newCard state lifted to App.jsx so it can be accessed by MainContent.jsx & Sidebar.jsx
   const [newCardData, setNewCardData] = useServerResponse('No cards created.');
   return (
     <div className="app-container">

@@ -28,7 +28,7 @@ def newCard():
         "message": "Card created successfully",
         "cardName": card_name,
         "createdAt": created_at
-    }), 201  # 201 Created status code
+    }), 201  # HTTP 201 means successful request & json creation
 
 @app.route('/api/csv-test', methods=['GET'])
 def get_csv_data():

@@ -18,18 +18,23 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData}) => {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        // Read full error message from Flask
+        const errorText = await response.text();  
+        throw new Error(`${errorText} Status: ${response.status}`);
       }
 
+      // Store json response once it returns
       const response_data = await response.json();
       console.log('New card created:', response_data);
 
       // Update response state in App.jsx
       setNewCardData(response_data.message); // For example, display the "message" field
+
     } catch (error) {
       // Debug code: Err not visible during normal operation
       console.error('Error creating new card:', error);
-      setnewCardData('Error creating new card.'); // Display error message
+      // Display error message in main content window
+      setnewCardData('Error creating new card.'); 
     }
   };
 

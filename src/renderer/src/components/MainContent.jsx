@@ -22,7 +22,7 @@ const MainContent = ({activeTab, newCardData}) => {
       if (!response.ok) {
         // Read full error message from Flask
         const errorText = await response.text();  
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        throw new Error(`${errorText} Status: ${response.status}`);
       }
       
       // Code seems to stop executing right here
@@ -35,9 +35,10 @@ const MainContent = ({activeTab, newCardData}) => {
       setCsvData(csvText);
 
     } catch (error) {
-      setCsvData('Error fetching CSV data.');
       // Debug code: Err not visible during normal operation
       console.error('Error fetching CSV data.', error);
+      // Display error message in main content window
+      setCsvData('Error fetching CSV data.');
     }
   };
 

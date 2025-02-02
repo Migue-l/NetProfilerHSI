@@ -1,8 +1,9 @@
 import React from 'react';
-import { useState } from 'react';
+import useServerResponse from '../../../hooks/useServerResponse'
 
-const MainContent = ({activeTab}) => {
-  const [csvData, setCsvData] = useState('Waiting for csv data...');
+// newCardData imported as param to render in MainContent window
+const MainContent = ({activeTab, newCardData}) => {
+  const [csvData, setCsvData] = useServerResponse('Waiting for csv data...');
   const fetchCsvData = async () => {
     try {
       // Check for server response, assign to local var
@@ -60,7 +61,9 @@ const MainContent = ({activeTab}) => {
 
   return (
     <div className="main-content">
-      {activeTab === 'My Cards'}
+      {activeTab === 'My Cards' && (
+        <pre>{newCardData}</pre>
+      )}
       {activeTab === 'Editor' && (
         <div>
           <button onClick={fetchCsvData}>Fetch CSV Data</button>

@@ -2,8 +2,8 @@ import React from 'react';
 import HSI_logo from '../assets/HSI_logo.png'
 import FGCU_logo from '../assets/FGCU_logo.jpg'
 
-const Sidebar = ({ activeTab, setServerResponse }) => {
-  const handleNewCard = async () => {
+const Sidebar = ({ activeTab, newCardData, setNewCardData}) => {
+  const fetchNewCardData = async () => {
     try {
       // Check for server response, assign to local var
       const response = await fetch('http://127.0.0.1:5000/api/new-card', {
@@ -21,15 +21,15 @@ const Sidebar = ({ activeTab, setServerResponse }) => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const data = await response.json();
-      console.log('New card created:', data);
+      const response_data = await response.json();
+      console.log('New card created:', response_data);
 
-      // Update the server response state
-      setServerResponse(data.message); // For example, display the "message" field
+      // Update response state in App.jsx
+      setNewCardData(response_data.message); // For example, display the "message" field
     } catch (error) {
       // Debug code: Err not visible during normal operation
       console.error('Error creating new card:', error);
-      setServerResponse('Error creating new card.'); // Display error message
+      setnewCardData('Error creating new card.'); // Display error message
     }
   };
 
@@ -39,7 +39,7 @@ const Sidebar = ({ activeTab, setServerResponse }) => {
         <div>
           <input type="text" className="search-bar" placeholder="Search cards" />
           <div className="button-container">
-            <button className="new-card-button" onClick={handleNewCard}>New Card</button>
+            <button className="new-card-button" onClick={fetchNewCardData}>New Card</button>
             <button className="new-deck-button">New Deck</button>
           </div>
           <div className="logo-container">

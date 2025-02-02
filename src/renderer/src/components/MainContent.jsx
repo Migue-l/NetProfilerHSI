@@ -24,7 +24,7 @@ const MainContent = ({activeTab}) => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       
-      // Debug code
+      // Code seems to stop executing right here
       console.log('HTTP Response OK');
 
       const data = await response.json();

@@ -5,7 +5,8 @@ import MainContent from './components/MainContent.jsx';
 
 function App() {
   const [activeTab, setActiveTab] = useState('My Cards');
-  const [serverResponse, setServerResponse] = useState(''); // State for server response
+  // Creates server state var & setter func from React Hook
+  const [serverResponse, setServerResponse] = useState('');
 
 
   return (

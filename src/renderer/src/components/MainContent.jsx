@@ -2,13 +2,11 @@ import React, { useState } from 'react';
 import useServerResponse from '../../../hooks/useServerResponse'
 
 // newCardData imported as param to render in MainContent window
-const MainContent = ({activeTab, newCardData}) => {
-
-   const [csvData, setCsvData] = useServerResponse('Waiting for csv data...');
-   const [selectedDirectory, setSelectedDirectory] = useState('');
-   const [entries, setEntries] = useState([]);
-   const [expandedDecks, setExpandedDecks] = useState({}); // Track expanded decks
-
+const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks }) => {
+  const [csvData, setCsvData] = useServerResponse('Waiting for csv data...');
+  const [selectedDirectory, setLocalSelectedDirectory] = useState('');
+  const [entries, setEntries] = useState([]);
+  const [expandedDecks, setExpandedDecks] = useState({});
   //   const fetchCsvData = async () => {
 //     try {
 //       // Check for server response, assign to local var
@@ -65,29 +63,33 @@ const MainContent = ({activeTab, newCardData}) => {
 //     return `${header}\n${separator}\n${rows}`;
 // };
 
+  // Fetch and set directory, decks, and entries
   const selectRootDirectory = async () => {
     try {
-        const response = await fetch('http://127.0.0.1:5000/api/select-directory', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        });
+      const response = await fetch('http://127.0.0.1:5000/api/select-directory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-        if (!response.ok) {
-            throw new Error('Failed to open file explorer');
-        }
+      if (!response.ok) {
+        throw new Error('Failed to open file explorer');
+      }
 
-        const data = await response.json();
-        console.log('Selected Directory:', data.directory);
-        console.log('Directory Structure:', JSON.stringify(data.entries, null, 2)); // Log actual structure
+      const data = await response.json();
+      console.log('Selected Directory:', data.directory);
+      console.log('Decks:', JSON.stringify(data.decks));
+      console.log('Directory Structure:', JSON.stringify(data.entries, null, 2));
 
-        setSelectedDirectory(data.directory);
-        setEntries(data.entries || {}); // Store raw object instead of array
+      setSelectedDirectory(data.directory); // Update global selected directory
+      setDecks(data.decks || []);  // Update global decks state
+      setEntries(data.entries || {});  // Store file structure
 
     } catch (error) {
-        console.error('Error selecting directory:', error);
+      console.error('Error selecting directory:', error);
     }
   };
 
+  // **Define refreshDirectory function**
   const refreshDirectory = async () => {
     try {
         const response = await fetch('http://127.0.0.1:5000/api/refresh-directory', {
@@ -113,10 +115,12 @@ const MainContent = ({activeTab, newCardData}) => {
     }
   };
 
-  const toggleDeck = (deckPath) => {
+
+   // Toggle deck expansion state
+  const toggleDeck = (deckName) => {
     setExpandedDecks((prev) => ({
       ...prev,
-      [deckPath]: !prev[deckPath] // Toggle state for deckPath
+      [deckName]: !prev[deckName]  // Toggle state for deckName
     }));
   };
 

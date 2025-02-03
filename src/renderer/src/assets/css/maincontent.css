@@ -1,0 +1,14 @@
+/* main content */
+.content-container {
+  border-top: 1px solid #bdbdbd;
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  padding: 30px;
+  background-color: #f9f9f9;
+  overflow-y: auto;
+}

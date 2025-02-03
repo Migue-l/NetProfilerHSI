@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import HSI_logo from '../assets/HSI_logo.png';
-import FGCU_logo from '../assets/FGCU_logo.jpg';
+import HSI_logo from '../assets/photos/HSI_logo.png';
+import FGCU_logo from '../assets/photos/FGCU_logo.png';
+import PlusAdd from '../assets/icons/PlusAdd.png';
+import DeckOfCards from '../assets/icons/DeckofCards.png';
 
 const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, availableDecks }) => {
   const [cardName, setCardName] = useState('');
@@ -103,9 +105,15 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
             ))}
           </select>
           <div className="button-container">
-            <button className="new-card-button" onClick={fetchNewCardData}>Add Card</button>
-            <button className="new-deck-button" onClick={fetchNewDeckData}>Add Deck</button>
+            <button className="new-card-button" onClick={fetchNewCardData}>
+              <img alt="add image" className="plus_sign" src={PlusAdd} />
+              Add Card</button>
+
+            <button className="new-deck-button" onClick={fetchNewDeckData}>
+              <img alt="deck of cards" className="deck_of_cards" src={DeckOfCards} />
+              Add Deck</button>
           </div>
+
           <div className="logo-container">
             <img alt="hsi logo" className="logo" src={HSI_logo} />
             <img alt="fgcu logo" className="logo" src={FGCU_logo} />
@@ -113,6 +121,7 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
         </div>
       )}
       {activeTab === 'Editor' && <div className="editor-sidebar">Editor sidebar stuff here</div>}
+       
     </div>
   );
 };

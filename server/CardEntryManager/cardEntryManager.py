@@ -3,6 +3,8 @@ import os
 import sys
 import subprocess
 
+
+
 class CardEntryManager:
     """
             Card Entry Manager Class
@@ -11,13 +13,12 @@ class CardEntryManager:
 
     """
 
-    def __init__(self, root_dir, prefix="Net-"):
-        self.root_dir = root_dir
+    def __init__(self, prefix="Net-"):
         self.prefix = prefix
 
-    def list_matching_files_and_folders(self, directory=None):
-        if directory is None:
-            directory = self.root_dir
+
+
+    def list_matching_files_and_folders(self, directory):
 
         result = {}
 
@@ -27,25 +28,24 @@ class CardEntryManager:
 
             # Check if item starts with the prefix
             if item.startswith(self.prefix):
+                clean_name = item[len(self.prefix):]  # Remove the prefix from the name
+
                 if os.path.isdir(item_path):
                     # Assign a dictionary to represent a "Card Deck" and store its contents
-                    result[item] = {
-                        "type": "Card Deck",
+                    result[clean_name] = {
+                        "type": "Deck",
                         "contents": self.list_matching_files_and_folders(item_path)
                     }
                 else:
                     # Assign "Card Entry" to files
-                    result[item] = {"type": "Card Entry"}
+                    result[clean_name] = {"type": "Card"}
 
         return result
 
-    def print_results(self):
-        matching_files_and_folders = self.list_matching_files_and_folders()
-        print(json.dumps(matching_files_and_folders, indent=2))
+
 
 # Example Usage
 if __name__ == "__main__":
     root_directory = "../DevDatabase"  # Change this to the actual directory
     scanner = CardEntryManager(root_directory)
-    scanner.print_results()
 

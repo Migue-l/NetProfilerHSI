@@ -1,34 +1,100 @@
+import numpy as np
+import os
+import threading
+import csv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import pandas as pd
-import numpy as np
-import os
+import tkinter as tk
+from tkinter import filedialog
 #from waitress import serve
+from CardEntryManager.cardEntryManager import CardEntryManager
 
 # Create 'main' app obj
 app = Flask(__name__)
 # Enable Flask debug mode
 app.config['DEBUG'] = True
 CORS(app)
+CardEntryManager = CardEntryManager()
+
+
+def select_directory_dialog(result_container):
+    """
+    Opens a file explorer window for directory selection and stores the result.
+    Uses threading to avoid blocking Flask.
+    """
+    global selected_directory
+    root = tk.Tk()
+    root.withdraw()  # Hide the root window
+    root.attributes('-topmost', True)  # Bring dialog to front
+
+    selected_directory = filedialog.askdirectory()  # Open file explorer
+    result_container["directory"] = selected_directory if selected_directory else None
+    cardsNDecks = CardEntryManager.list_matching_files_and_folders(selected_directory)
+    result_container["entries"] = cardsNDecks
+    root.destroy()  # Destroy Tkinter instance
+
+@app.route('/api/select-directory', methods=['POST'])
+def select_directory():
+    try:
+        result_container = {"directory": None, "entries": None}
+        thread = threading.Thread(target=select_directory_dialog, args=(result_container,))
+        thread.start()
+        thread.join()  # Wait for thread to finish
+
+        if not result_container["directory"]:
+            return jsonify({"error": "No directory selected"}), 400
+
+        return jsonify({"directory": result_container["directory"], "entries": result_container["entries"]}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/refresh-directory', methods=['POST'])
+def refresh_directory():
+    try:
+        global selected_directory
+        if not selected_directory:
+            return jsonify({"error": "No directory selected to refresh"}), 400
+
+        refreshed_entries = CardEntryManager.list_matching_files_and_folders(selected_directory)
+        return jsonify({"directory": selected_directory, "entries": refreshed_entries}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/new-card', methods=['POST'])
 def newCard():
-    # Parse the incoming JSON fetch request
-    data = request.get_json()
+    try:
+        global selected_directory
+        if not selected_directory:
+            return jsonify({"error": "No directory selected"}), 400
 
-    # Access fields from the request body
-    card_name = data.get('cardName', 'Unnamed Card')
-    created_at = data.get('createdAt', 'Unknown Time')
+        # Parse the incoming JSON fetch request
+        data = request.get_json()
+        card_name = data.get('cardName', 'Unnamed_Card').replace(" ", "_")  # Remove spaces
+        created_at = data.get('createdAt', 'Unknown Time')
 
-    # Log or handle the card data as needed (e.g., save to a database)
-    print(f"New Card Created: {card_name}, at {created_at}")
+        # Define file path
+        file_path = os.path.join(selected_directory, f"{card_name}.csv")
 
-    # Send a response back to the client
-    return jsonify({
-        "message": "Card created successfully",
-        "cardName": card_name,
-        "createdAt": created_at
-    }), 201  # HTTP 201 means successful request & json creation
+        # Create and write CSV file
+        with open(file_path, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["Card Name", "Created At"])  # CSV Header
+            writer.writerow([card_name, created_at])  # Data Row
+
+        print(f"New Card Created: {card_name}, at {created_at}. Saved as {file_path}")
+
+        return jsonify({
+            "message": "Card created successfully",
+            "cardName": card_name,
+            "createdAt": created_at,
+            "filePath": file_path
+        }), 201  # HTTP 201 means successful request & file creation
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/csv-test', methods=['GET'])
 def get_csv_data():

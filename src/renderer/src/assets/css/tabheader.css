@@ -1,0 +1,67 @@
+/* Top Area */
+.tab-header {
+  display: flex;
+  background-color: #a9a9a9;
+}
+
+
+/* Folder Tabs */
+.tab {
+  margin-top: 17px;
+  border-bottom: 1px solid none;
+  border-radius: 10px 10px 0px 0px;
+  background-color: #04548b;
+  padding: 8px 22px;
+  color: #ececec;
+
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  font-size: 17px;
+  padding-right: 100px;
+  z-index: 0;
+  position: relative;
+  transition:
+    color 0.3s ease,
+    border-color 0.3s ease;
+  transform: translateY(1px);
+}
+
+/* Folder Tab Active */
+.tab.active {
+  box-shadow:
+    -2px 0 10px rgba(0, 0, 0, 0.3),
+    2px 0 10px rgba(0, 0, 0, 0.3);
+  margin-top: 5px;
+  padding: 8px 22px;
+  background-color: #ececec;
+  font-weight: bold;
+  color: #000000;
+  padding-right: 100px;
+  font-size: 17px;
+  z-index: 1;
+  position: relative;
+  transition:
+    color 0.3s ease,
+    background-color 0.3s ease;
+}
+
+/* Folder Tab Active Hover*/
+.tab.active:hover {
+  background-color: #e0e0e0;
+  color: #6f6f6f;
+  transition:
+    color 0.3s ease,
+    background-color 0.3s ease;
+}
+
+/* Folder Tab Inactive Hover */
+.tab:hover {
+  background-color: #047bb3;
+  transition:
+    color 0.3s ease,
+    background-color 0.3s ease;
+}
+
+.tab:hover:active {
+  transform: translateY(2px);
+}

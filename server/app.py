@@ -94,7 +94,7 @@ def newCard():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
+# potentially make into separate
 @app.route('/api/new-deck', methods=['POST'])
 def newDeck():
     """Creates a new deck, allowing it to be placed in another deck or root directory."""

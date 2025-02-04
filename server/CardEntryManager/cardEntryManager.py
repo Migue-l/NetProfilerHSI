@@ -25,7 +25,7 @@ class CardEntryManager:
             return True
         return False
 
-
+    # decks as different objects
     def list_matching_files_and_folders(self, directory):
 
         result = {}
@@ -38,6 +38,8 @@ class CardEntryManager:
             if item.startswith(self.prefix):
                 clean_name = item[len(self.prefix):]  # Remove the prefix from the name
 
+                # if the path is a directory with the desired prefix, make it into an object type of Deck with content attribute
+                # Assign "Deck" to Folder
                 if os.path.isdir(item_path):
                     # Assign a dictionary to represent a "Card Deck" and store its contents
                     result[clean_name] = {
@@ -45,8 +47,10 @@ class CardEntryManager:
                         "contents": self.list_matching_files_and_folders(item_path)
                     }
                 else:
-                    # Assign "Card Entry" to files
-                    result[clean_name] = {"type": "Card"}
+                    # Assign "Card" to files
+                    result[clean_name] = {
+                        "type": "Card"}
+
 
         return result
 

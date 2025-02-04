@@ -95,7 +95,7 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
             value={selectedLocation}
             onChange={(e) => setSelectedLocation(e.target.value)}
           >
-            <option value="">Select a location</option>
+            <option value="">root-deck</option>
             {availableDecks.map((deck, index) => (
               <option key={index} value={deck}>
                 {deck}

@@ -89,7 +89,7 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks })
     }
   };
 
-  // **Define refreshDirectory function**
+  // **Define refreshDirectory function** 
   const refreshDirectory = async () => {
     try {
         const response = await fetch('http://127.0.0.1:5000/api/refresh-directory', {

@@ -10,7 +10,7 @@ function createWindow() {
     width: 1920,
     height: 1080,
     show: false,
-    autoHideMenuBar: false,
+    autoHideMenuBar: true,
 
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {

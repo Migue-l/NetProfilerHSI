@@ -12,3 +12,96 @@
   background-color: #f9f9f9;
   overflow-y: auto;
 }
+
+
+/* Button to select directory */
+.select-dir-button {
+  display: block;
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: #ffffff;
+  color: #333333;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease, transform 0.2s ease, background-color 0.3s ease;
+  font-size: 16px;
+}
+
+.select-dir-button:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+  background-color: #f1f1f1;
+}
+
+/* Container for cards */
+.entries-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: flex-start;
+  padding: 10px 0;
+}
+
+/* Nested entries container */
+.nested-entries {
+  margin-left: 20px;
+  padding-left: 15px;
+  border-left: 2px dashed #ccc;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* Entry buttons */
+.entry-card {
+  flex: 1 1 calc(20% - 15px);
+  max-width: calc(20% - 15px);
+  padding: 12px;
+  background-color: #ffffff;
+  color: #333333;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease, transform 0.2s ease, background-color 0.3s ease;
+  font-size: 14px;
+  text-align: center;
+}
+
+.entry-card:hover {
+  background-color: #f1f1f1;
+}
+
+.deck-button {
+  font-weight: bold;
+  background-color: #f9f9f9;
+}
+
+.deck-button:hover {
+  background-color: #e1e1e1;
+}
+
+/* Refresh Directory Button */
+.refresh-dir-button {
+  display: block;
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: #ffffff;
+  color: #333333;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease, transform 0.2s ease, background-color 0.3s ease;
+  font-size: 16px;
+}
+
+.refresh-dir-button:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+  background-color: #f1f1f1;
+}

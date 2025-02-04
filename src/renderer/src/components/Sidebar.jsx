@@ -104,23 +104,23 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
               </option>
             ))}
           </select>
-          <div className="button-container">
+          <div className="card-button-container">
             <button className="new-card-button" onClick={fetchNewCardData}>
               <img alt="add image" className="plus_sign" src={PlusAdd} />
-              Add Card</button>
+              New Card</button>
 
             <button className="new-deck-button" onClick={fetchNewDeckData}>
               <img alt="deck of cards" className="deck_of_cards" src={DeckOfCards} />
-              Add Deck</button>
-          </div>
-
-          <div className="logo-container">
-            <img alt="hsi logo" className="logo" src={HSI_logo} />
-            <img alt="fgcu logo" className="logo" src={FGCU_logo} />
+              New Deck</button>
           </div>
         </div>
       )}
       {activeTab === 'Editor' && <div className="editor-sidebar">Editor sidebar stuff here</div>}
+
+      <div className="logo-container">
+            <img alt="hsi logo" className="logo" src={HSI_logo} />
+            <img alt="fgcu logo" className="logo" src={FGCU_logo} />
+      </div>
        
     </div>
   );

@@ -111,63 +111,20 @@ def newDeck():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
 
+@app.route('/api/get-csv-data', methods=['GET'])
+def get_csv_data():
+    try:
+        # Read CSV file
+        with open('test.csv', newline='', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            data = [row for row in reader]  # Convert rows to list of dictionaries
+        
+        return jsonify({"columns": reader.fieldnames, "data": data}), 200
 
-# @app.route('/api/csv-test', methods=['GET'])
-# def get_csv_data():
-#     try:
-#         # Check if Flask receives request from front-end
-#         print("Received request for /api/csv-test")
-#
-#         # Check if file exists before reading
-#         if not os.path.exists('test.csv'):
-#             print("Error: test.csv file not found.")
-#             return jsonify({"Read Error": "File test.csv not found"}), 500
-#
-#         # Check if Python has permission to read test csv
-#         if not os.access('test.csv', os.R_OK):
-#             print("Error: Flask does not have permission to read test.csv.")
-#             return jsonify({"Read Error": "Python lacks read permissions for test.csv"}), 500
-#
-#         print("Success: Flask can read the file.")
-#
-#         df = pd.read_csv('test.csv')
-#         # Debug code: Print CSV contents to verify read
-#         print("CSV successfully read. First few rows:")
-#         print(df.head())
-#
-#         # Convert DataFrame to more JSON-friendly dict
-#         data = {
-#             # list() converts column indexes into python list
-#             "columns" : list(df.columns),
-#             # to_list() converts numpy arr into list of lists
-#             "data" : df.values.tolist()
-#         }
-#         # Send json response to the front-end
-#         return jsonify(data)
-#     except Exception as e:
-#         print(f"Error reading CSV: {e}")
-#         # Code 500 is an HTML server error
-#         return jsonify({"Server Error": f"Failed to read CSV file: {str(e)}"}), 500
-#
-#
-# @app.route('/api/csv-test', methods=['POST'])
-# def post_csv_data():
-#     try:
-#         # Parse the incoming JSON data returning from the front end
-#         data = request.get_json()
-#         # Save columns & rows from incoming json to local var
-#         columns = data.get('columns', [])
-#         rows = data.get('data', [])
-#         # Convert the received data back into a DataFrame
-#         df = pd.DataFrame(rows, columns=columns)
-#         # Re-save as csv with updated data from client
-#         df.to_csv('test.csv', index=False)  # Save back to CSV
-#         # Send success response (HTML Code 200)
-#         return jsonify({"message": "CSV data successfully updated"}), 200
-#     # Send error if the returned json fails to be processed by server
-#     except Exception as e:
-#         return jsonify({"Server Error": f"Error processing the data: {str(e)}"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000)

@@ -23,6 +23,7 @@ function App() {
         />
         <MainContent
           activeTab={activeTab}
+          setActiveTab={setActiveTab}
           newCardData={newCardData}
           setSelectedDirectory={setSelectedDirectory}
           setDecks={setDecks}  // Pass setter function to update decks in App

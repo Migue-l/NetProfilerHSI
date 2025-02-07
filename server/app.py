@@ -116,11 +116,14 @@ def newDeck():
 @app.route('/api/get-csv-data', methods=['GET'])
 def get_csv_data():
     try:
+        # Get absolute path of test.csv in server folder
+        csv_file_path = os.path.join(os.path.dirname(__file__), "test.csv")
+
         # Read CSV file
-        with open('test.csv', newline='', encoding='utf-8') as csvfile:
+        with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
             data = [row for row in reader]  # Convert rows to list of dictionaries
-        
+
         return jsonify({"columns": reader.fieldnames, "data": data}), 200
 
     except Exception as e:

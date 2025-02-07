@@ -9,15 +9,8 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
   const [selectedCard, setSelectedCard] = useState(null);
 
   const fetchCsvContent = async () => {
-    const filePath = "/server/test.csv"; // Replace with actual path
-  
-    console.log(`Fetching CSV content from: ${filePath}`);
-  
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/get-file?path=${encodeURIComponent(filePath)}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const response = await fetch(`http://127.0.0.1:5000/api/get-csv-data`);
   
       if (!response.ok) {
         throw new Error(`Failed to fetch CSV. Status: ${response.status}`);
@@ -26,11 +19,12 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
       const data = await response.json();
       console.log("CSV Data Response:", data);
   
-      if (!data.content) {
+      if (!data.data || data.data.length === 0) {
         return 'Error: Empty CSV file.';
       }
   
-      return data.content;
+      // Convert JSON to readable text format
+      return csvToText(data);
     } catch (error) {
       console.error('Error fetching CSV file:', error);
       return `Error loading CSV file: ${error.message}`;
@@ -38,14 +32,15 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
   };
   
   
+  
 
   const csvToText = (jsonData) => {
     if (!jsonData || !jsonData.columns || !jsonData.data) return 'Invalid data format';
-
+  
     const header = jsonData.columns.join(' | ');
     const separator = '-'.repeat(header.length);
-    const rows = jsonData.data.map(row => row.join(' | ')).join('\n');
-
+    const rows = jsonData.data.map(row => jsonData.columns.map(col => row[col]).join(' | ')).join('\n');
+  
     return `${header}\n${separator}\n${rows}`;
   };
 
@@ -108,6 +103,8 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
     console.log(`CSV Content Received:`, csvContent);
   
     setCsvData(csvContent);
+
+    setActiveTab("Editor");
   };
   
   

@@ -3,16 +3,26 @@
   width: 375px;
   background-color: #ececec;
   padding: 25px;
-  border-right: 1px solid #dadada;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 2px 0 10px -5px rgba(0, 0, 0, 0.3);
   position: relative;
-  z-index: 2;
+  z-index: 3;
+}
+
+/* Sidebar border */
+.sidebar::before {
+  content: '';
+  position: absolute;
+  top: 20px; 
+  bottom: 20px; 
+  right: 0;
+  width: 2px;
+  background-color: #dadada; 
 }
 
 /* sidebar items */
+
 /* search bar */
 .search-bar {
   width: 320px;
@@ -108,5 +118,5 @@
 /* sidebar logos */
 .logo {
   width: 90%;
-  opacity: 0.2;
+  opacity: 0.3;
 }

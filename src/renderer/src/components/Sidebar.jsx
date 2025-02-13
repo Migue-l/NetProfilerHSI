@@ -116,6 +116,7 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
         </div>
       )}
       {activeTab === 'Editor' && <div className="editor-sidebar">Editor sidebar stuff here</div>}
+      {activeTab === 'Settings' && <div className="settings-sidebar"></div>}
 
       <div className="logo-container">
             <img alt="hsi logo" className="logo" src={HSI_logo} />

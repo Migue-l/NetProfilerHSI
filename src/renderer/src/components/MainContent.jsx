@@ -154,23 +154,50 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
           <div className="entries-container">{renderEntries(entries)}</div>
         </div>
       )}
-      {activeTab === 'Editor' && (
-        <div>
-          {selectedCard ? (
-            <div>
-              <h2>Editing: {selectedCard.name}</h2>
-              <p>Type: {selectedCard.details.type}</p>
-              <p>Details: {JSON.stringify(selectedCard.details, null, 2)}</p>
-              <div>
-                <h3>CSV Content:</h3>
-                <pre className="csv-content">{csvData || 'Loading CSV data...'}</pre>
-              </div>
+      {activeTab === 'Editor'}
+
+      {activeTab === 'Settings' && (
+        <div className="settings-container">
+          <div className="indivdual-settings-containers">Always save to default location
+            <label class="container">
+              <input type="checkbox"/>
+              <span class="checkmark"></span>
+            </label>
+          </div>
+
+          <div className="indivdual-settings-containers"><b>Change Defaults: </b>
+            <div className="settings-text">Default export location:</div>
+              <button className="choose-export-or-deck">
+                C:\Users\...
+              </button>
+            <div className="settings-text">Always save new cards to:</div>
+              <button className="choose-export-or-deck">
+                Choose a Deck
+              </button>
+            <div className="settings-text">Default card categories:</div>
+              <input
+                type="text"
+                className="default-categories"
+                placeholder="Personal, Contact, Immigration, Vehicle, Affiliation, Criminal, Case Notes"
+              />
+          </div>
+
+          <div className="indivdual-settings-containers"><b>Batch Exports:</b>
+            <div class="text" className="settings-text">Prompt for each file save
+            <label class="container">
+                <input type="checkbox"/>
+                <span class="checkmark"></span>
+              </label>
             </div>
-          ) : (
-          <p>Select a card to edit</p>
-        )}
-      </div>
-    )}
+             <div className="settings-text">Run in background
+              <label class="container">
+                <input type="checkbox"/>
+                <span class="checkmark"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

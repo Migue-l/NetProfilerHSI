@@ -2,11 +2,25 @@ import React, { useState } from 'react';
 import useServerResponse from '../../../hooks/useServerResponse'
 
 // newCardData imported as param to render in MainContent window
-const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks }) => {
+const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks}) => {
   const [csvData, setCsvData] = useServerResponse('Waiting for csv data...');
   const [selectedDirectory, setLocalSelectedDirectory] = useState('');
   const [entries, setEntries] = useState([]);
   const [expandedDecks, setExpandedDecks] = useState({});
+
+// needed to render content in editor
+  const [activeEditorCard, setActiveEditorCard] = useState('New Card 1');
+  const [categories, setCategories] = useState(["Category 1", "Category 2"]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [newCategory, setNewCategory] = useState("");
+
+  const addCategory = () => {
+    if (newCategory.trim() !== "") {
+      setCategories([...categories, newCategory]);
+      setNewCategory("");
+    }
+  };
+  
   //   const fetchCsvData = async () => {
 //     try {
 //       // Check for server response, assign to local var
@@ -162,26 +176,68 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks })
 
   return (
     <div className="main-content">
-      {activeTab === 'My Cards' && (
-          <div>
-            <button onClick={selectRootDirectory} className="select-dir-button">
-              Select Root Directory
-            </button>
-            <button onClick={refreshDirectory} className="refresh-dir-button">
-              Refresh Directory
-            </button>
+      {activeTab === "My Cards" && (
+        <div>
+          <button onClick={selectRootDirectory} className="select-dir-button">
+            Select Root Directory
+          </button>
+          <button onClick={refreshDirectory} className="refresh-dir-button">
+            Refresh Directory
+          </button>
 
-            {selectedDirectory && <p>Selected Directory: {selectedDirectory}</p>}
+          {selectedDirectory && <p>Selected Directory: {selectedDirectory}</p>}
 
-            <div className="entries-container">
-              {renderEntries(entries)}
+          <div className="entries-container">{renderEntries(entries)}</div>
+        </div>
+      )}
+
+      {activeTab === "Editor" && (
+        <header className="editor-card-header">
+          <div
+            className={`editor-card-tab ${activeEditorCard === "New Card 1" ? "active" : ""}`}
+            onClick={() => setActiveEditorCard("New Card 1")}
+          >
+            New Card 1
+          </div>
+
+          <div
+            className={`editor-card-tab ${activeEditorCard === "New Card 2" ? "active" : ""}`}
+            onClick={() => setActiveEditorCard("New Card 2")}
+          >
+            New Card 2
+          </div>
+        </header>
+      )}
+
+      {activeTab==="Editor" && activeEditorCard === "New Card 1" && (
+        <div className="editor-container">
+          <div className="categories-container">
+            <div className="categories-list">
+              {categories.map((category, index) => (
+                <button
+                  key={index}
+                  className="category-button"
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+            <div className="add-category">
+              <input
+                type="text"
+                placeholder="New category"
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+              />
+              <button onClick={addCategory}>+</button>
             </div>
           </div>
-      )}
-      {activeTab === 'Editor' && (
-          <div>
-            This is the editor window
+
+          <div className="category-editing-panel">
+            Editing {selectedCategory}
           </div>
+        </div>
       )}
     </div>
   );

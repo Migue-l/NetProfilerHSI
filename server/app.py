@@ -18,7 +18,6 @@ CORS(app)
 CardEntryManager = CardEntryManager()
 selected_directory = None  # Global variable for selected root directory
 
-
 def select_directory_dialog(result_container):
     """Opens a file explorer window for directory selection."""
     global CardEntryManager
@@ -74,8 +73,6 @@ def refresh_directory():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-
 @app.route('/api/new-card', methods=['POST'])
 def newCard():
     """Creates a new card, allowing it to be placed in a deck or the root directory."""
@@ -94,7 +91,6 @@ def newCard():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 @app.route('/api/new-deck', methods=['POST'])
 def newDeck():
     """Creates a new deck, allowing it to be placed in another deck or root directory."""
@@ -111,20 +107,69 @@ def newDeck():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
+@app.route('/api/upload-csv', methods=['POST'])
+def upload_csv():
+    """Handles CSV file upload and appends the data to test.csv."""
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file provided'}), 400
+
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+
+        # Path to test.csv in the server folder
+        csv_file_path = os.path.join(os.path.dirname(__file__), "test.csv")
+        print("CSV file path:", csv_file_path)  # Debugging line
+
+        # Load existing CSV if available, else create an empty DataFrame
+        if os.path.exists(csv_file_path):
+            existing_data = pd.read_csv(csv_file_path, dtype=str)  # Ensure data remains as string
+        else:
+            existing_data = pd.DataFrame()
+
+        # Read the newly uploaded CSV file
+        new_data = pd.read_csv(file, dtype=str)
+
+        # Ensure column headers match before appending
+        if not existing_data.empty and list(existing_data.columns) != list(new_data.columns):
+            return jsonify({'error': 'Uploaded CSV does not match the required format'}), 400
+
+        # Append new data
+        combined_data = pd.concat([existing_data, new_data], ignore_index=True)
+        combined_data.to_csv(csv_file_path, index=False)  # Save back to test.csv
+
+        # Now return the updated data
+        return jsonify({
+            'message': 'CSV uploaded successfully',
+            'file_path': csv_file_path,
+            'updated_data': combined_data.to_dict(orient="records")  # Sending updated data back
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 @app.route('/api/get-csv-data', methods=['GET'])
 def get_csv_data():
+    """Reads test.csv and returns the Name column for display."""
     try:
-        # Get absolute path of test.csv in server folder
         csv_file_path = os.path.join(os.path.dirname(__file__), "test.csv")
 
-        # Read CSV file
-        with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
-            reader = csv.DictReader(csvfile)
-            data = [row for row in reader]  # Convert rows to list of dictionaries
+        if not os.path.exists(csv_file_path):
+            return jsonify({"error": "No data available"}), 400
 
-        return jsonify({"columns": reader.fieldnames, "data": data}), 200
+        # Read the CSV file as a DataFrame
+        df = pd.read_csv(csv_file_path, dtype=str)
+
+        # Ensure "Name" column exists
+        if "Name" not in df.columns:
+            return jsonify({"error": "CSV file does not contain 'Name' column"}), 400
+
+        names_list = df["Name"].tolist()
+
+        return jsonify({"names": names_list}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

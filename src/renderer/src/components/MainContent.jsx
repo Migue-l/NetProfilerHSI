@@ -30,9 +30,6 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
       return `Error loading CSV file: ${error.message}`;
     }
   };
-  
-  
-  
 
   const csvToText = (jsonData) => {
     if (!jsonData || !jsonData.columns || !jsonData.data) return 'Invalid data format';
@@ -98,16 +95,13 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
   
     setSelectedCard({ name: cardName, details });
   
-    // Always fetch test.csv, no matter which card is clicked
+    // Always fetch CSV data when a card is clicked
     const csvContent = await fetchCsvContent();
     console.log(`CSV Content Received:`, csvContent);
   
     setCsvData(csvContent);
-
     setActiveTab("Editor");
   };
-  
-  
 
   const renderEntries = (entries, parentPath = '') => {
     const sortedEntries = Object.entries(entries).sort((a, b) => {
@@ -148,51 +142,56 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
           <button onClick={refreshDirectory} className="refresh-dir-button">
             Refresh Directory
           </button>
-
           {selectedDirectory && <p>Selected Directory: {selectedDirectory}</p>}
-
           <div className="entries-container">{renderEntries(entries)}</div>
         </div>
       )}
-      {activeTab === 'Editor'}
-
+      {activeTab === 'Editor' && (
+        <div className="editor-container">
+        </div>
+      )}
       {activeTab === 'Settings' && (
         <div className="settings-container">
-          <div className="indivdual-settings-containers">Always save to default location
-            <label class="container">
-              <input type="checkbox"/>
-              <span class="checkmark"></span>
+          <div className="indivdual-settings-containers">
+            Always save to default location
+            <label className="container">
+              <input type="checkbox" />
+              <span className="checkmark"></span>
             </label>
           </div>
 
-          <div className="indivdual-settings-containers"><b>Change Defaults: </b>
+          <div className="indivdual-settings-containers">
+            <b>Change Defaults: </b>
             <div className="settings-text">Default export location:</div>
-              <button className="choose-export-or-deck">
-                C:\Users\...
-              </button>
+            <button className="choose-export-or-deck">
+              C:\Users\...
+            </button>
             <div className="settings-text">Always save new cards to:</div>
-              <button className="choose-export-or-deck">
-                Choose a Deck
-              </button>
+            <button className="choose-export-or-deck">
+              Choose a Deck
+            </button>
             <div className="settings-text">Default card categories:</div>
-              <input
-                type="text"
-                className="default-categories"
-                placeholder="Personal, Contact, Immigration, Vehicle, Affiliation, Criminal, Case Notes"
-              />
+            <input
+              type="text"
+              className="default-categories"
+              placeholder="Personal, Contact, Immigration, Vehicle, Affiliation, Criminal, Case Notes"
+            />
           </div>
 
-          <div className="indivdual-settings-containers"><b>Batch Exports:</b>
-            <div class="text" className="settings-text">Prompt for each file save
-            <label class="container">
-                <input type="checkbox"/>
-                <span class="checkmark"></span>
+          <div className="indivdual-settings-containers">
+            <b>Batch Exports:</b>
+            <div className="settings-text">
+              Prompt for each file save
+              <label className="container">
+                <input type="checkbox" />
+                <span className="checkmark"></span>
               </label>
             </div>
-             <div className="settings-text">Run in background
-              <label class="container">
-                <input type="checkbox"/>
-                <span class="checkmark"></span>
+            <div className="settings-text">
+              Run in background
+              <label className="container">
+                <input type="checkbox" />
+                <span className="checkmark"></span>
               </label>
             </div>
           </div>

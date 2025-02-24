@@ -40,6 +40,18 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
   
     return `${header}\n${separator}\n${rows}`;
   };
+// needed to render content in editor
+  const [activeEditorCard, setActiveEditorCard] = useState('New Card 1');
+  const [categories, setCategories] = useState(["Category 1", "Category 2"]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [newCategory, setNewCategory] = useState("");
+
+  const addCategory = () => {
+    if (newCategory.trim() !== "") {
+      setCategories([...categories, newCategory]);
+      setNewCategory("");
+    }
+  };
 
   const selectRootDirectory = async () => {
     try {
@@ -134,7 +146,7 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
 
   return (
     <div className="main-content">
-      {activeTab === 'My Cards' && (
+      {activeTab === "My Cards" && (
         <div>
           <button onClick={selectRootDirectory} className="select-dir-button">
             Select Root Directory
@@ -142,14 +154,62 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
           <button onClick={refreshDirectory} className="refresh-dir-button">
             Refresh Directory
           </button>
+
           {selectedDirectory && <p>Selected Directory: {selectedDirectory}</p>}
+
           <div className="entries-container">{renderEntries(entries)}</div>
         </div>
       )}
-      {activeTab === 'Editor' && (
+
+      {activeTab === "Editor" && (
+        <header className="editor-card-header">
+          <div
+            className={`editor-card-tab ${activeEditorCard === "New Card 1" ? "active" : ""}`}
+            onClick={() => setActiveEditorCard("New Card 1")}
+          >
+            New Card 1
+          </div>
+
+          <div
+            className={`editor-card-tab ${activeEditorCard === "New Card 2" ? "active" : ""}`}
+            onClick={() => setActiveEditorCard("New Card 2")}
+          >
+            New Card 2
+          </div>
+        </header>
+      )}
+
+      {activeTab==="Editor" && activeEditorCard === "New Card 1" && (
         <div className="editor-container">
+          <div className="categories-container">
+            <div className="categories-list">
+              {categories.map((category, index) => (
+                <button
+                  key={index}
+                  className="category-button"
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+            <div className="add-category">
+              <input
+                type="text"
+                placeholder="New category"
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+              />
+              <button onClick={addCategory}>+</button>
+            </div>
+          </div>
+
+          <div className="category-editing-panel">
+            Editing {selectedCategory}
+           </div>
         </div>
       )}
+
       {activeTab === 'Settings' && (
         <div className="settings-container">
           <div className="indivdual-settings-containers">

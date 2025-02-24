@@ -7,12 +7,22 @@
 
 /* Folder Tabs */
 .tab {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 3px 3px 0px #033f64;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.2s ease,
+    background-color 0.3s ease,
+    border-left 0.3s ease;
   margin-top: 17px;
-  border-bottom: 1px solid none;
   border-radius: 10px 10px 0px 0px;
   background-color: #04548b;
   padding: 8px 22px;
   color: #ececec;
+  font-weight: bold;
+  border-left: 2px solid #0d669e;
 
   cursor: pointer;
   border-bottom: 3px solid transparent;
@@ -20,20 +30,16 @@
   padding-right: 100px;
   z-index: 0;
   position: relative;
-  transition:
-    color 0.3s ease,
-    border-color 0.3s ease;
   transform: translateY(1px);
 }
 
 /* Folder Tab Active */
 .tab.active {
-  box-shadow:
-    -2px 0 10px rgba(0, 0, 0, 0.3),
-    2px 0 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 4px 6px 0px #c9c9c9;
   margin-top: 5px;
   padding: 8px 22px;
   background-color: #ececec;
+  border-left: 2px solid #ffffff;
   font-weight: bold;
   color: #000000;
   padding-right: 100px;
@@ -41,25 +47,50 @@
   z-index: 1;
   position: relative;
   transition:
+    border-left 0.3s ease,
     color 0.3s ease,
-    background-color 0.3s ease;
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+/* Settings Tab */
+.settings-tab {
+  width: 5%;
+  margin-left: auto;
+  margin-right: 20px;
+  padding-right: 20px;
+}
+
+/* Settings Tab Active */
+.settings-tab.active {
+  width: 5%;
+  margin-left: auto;
+  margin-right: 20px;
+  padding-right: 20px;
+}
+
+/* Settings Icon */
+.settings-icon {
+  width: 20px;
+  transform: translateY(3px);
 }
 
 /* Folder Tab Active Hover*/
 .tab.active:hover {
-  background-color: #e0e0e0;
-  color: #6f6f6f;
-  transition:
-    color 0.3s ease,
-    background-color 0.3s ease;
+  background-color: #ececec;
+  cursor: auto;
 }
 
 /* Folder Tab Inactive Hover */
 .tab:hover {
   background-color: #047bb3;
+  transform: scale(1, 1.06);
   transition:
+    transform 0.2s ease,
+    border-left 0.3s ease,
     color 0.3s ease,
-    background-color 0.3s ease;
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .tab:hover:active {

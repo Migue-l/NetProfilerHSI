@@ -3,6 +3,8 @@ import HSI_logo from '../assets/photos/HSI_logo.png';
 import FGCU_logo from '../assets/photos/FGCU_logo.png';
 import PlusAdd from '../assets/icons/PlusAdd.png';
 import DeckOfCards from '../assets/icons/DeckofCards.png';
+import CSVicon from '../assets/icons/CSVicon.png';
+import PDFicon from '../assets/icons/PDFicon.png';
 
 const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, availableDecks }) => {
   const [cardName, setCardName] = useState('');
@@ -115,7 +117,24 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
           </div>
         </div>
       )}
-      {activeTab === 'Editor' && <div className="editor-sidebar">Editor sidebar stuff here</div>}
+      {activeTab === 'Editor' && <div className="editor-sidebar">
+        <div className="import-export-container">
+            <button className="import-export-button">
+              <img alt="csv icon" className="csv-icon" src={CSVicon} />
+              Import File</button>
+
+            <button className="import-export-button">
+              <img alt="pdf icon" className="pdf-icon" src={PDFicon} />
+              Export File</button>
+
+              <button className="scrollable-box">
+                scrollable box jonathan requested for the indexed csv entries
+              </button>
+          </div>
+      </div>
+      
+      }
+      {activeTab === 'Settings' && <div className="settings-sidebar"></div>}
 
       <div className="logo-container">
             <img alt="hsi logo" className="logo" src={HSI_logo} />

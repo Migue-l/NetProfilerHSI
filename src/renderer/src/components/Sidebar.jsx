@@ -6,7 +6,7 @@ import DeckOfCards from '../assets/icons/DeckofCards.png';
 import CSVicon from '../assets/icons/CSVicon.png';
 import PDFicon from '../assets/icons/PDFicon.png';
 
-const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, availableDecks }) => {
+const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, availableDecks, onRefresh}) => {
   const [cardName, setCardName] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [csvEntries, setCsvEntries] = useState([]);  // State to hold CSV names
@@ -44,10 +44,14 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
     const uniqueCardName = `Net-Card-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}`;
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/new-card', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cardName: uniqueCardName, location: selectedLocation || "", createdAt: new Date().toISOString() }),
+      const response = await fetch("http://127.0.0.1:5000/api/new-card", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cardName: uniqueCardName,
+          location: selectedLocation || "",
+          createdAt: new Date().toISOString(),
+        }),
       });
 
       if (!response.ok) {
@@ -58,6 +62,7 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
       const data = await response.json();
       alert(`Card Created: ${data.cardName}\nSaved at: ${data.filePath}`);
       setNewCardData(data.message);
+      onRefresh(); // refresh directory after new card created
     } catch (error) {
       console.error('Error creating new card:', error);
       alert('Failed to create new card.');

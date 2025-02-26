@@ -1,5 +1,4 @@
 import React from 'react';
-import Settings from '../assets/icons/Settings.png';
 
 const TabHeader = ({ activeTab, setActiveTab }) => {
   return (
@@ -20,7 +19,7 @@ const TabHeader = ({ activeTab, setActiveTab }) => {
         className={`tab ${activeTab === 'Settings' ? 'active' : ''} settings-tab`}
         onClick={() => setActiveTab('Settings')}
       > 
-        <img alt="settings icon" className="settings-icon" src={Settings} />
+        Settings
       </div>
     </header>
   );

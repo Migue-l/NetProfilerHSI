@@ -127,12 +127,22 @@
 }
 
 .editor-card-tab {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 3px 3px 0px #033f64;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.2s ease,
+    background-color 0.3s ease,
+    border-left 0.3s ease;
   margin-top: 17px;
-  border-bottom: 1px solid none;
   border-radius: 10px 10px 0px 0px;
   background-color: #04548b;
   padding: 8px 22px;
   color: #ececec;
+  font-weight: bold;
+  border-left: 2px solid #0d669e;
 
   cursor: pointer;
   border-bottom: 3px solid transparent;
@@ -140,19 +150,15 @@
   padding-right: 100px;
   z-index: 0;
   position: relative;
-  transition:
-    color 0.3s ease,
-    border-color 0.3s ease;
   transform: translateY(1px);
 }
 
 .editor-card-tab.active {
-  box-shadow:
-    5px 0px 10px 0px rgba(0, 0, 0, 0.3), 
-    0px -5px 10px 0px rgba(0, 0, 0, 0.3); 
+  box-shadow: 4px 6px 0px #c9c9c9;
   margin-top: 5px;
   padding: 8px 22px;
-  background-color: #ececec;
+  background:  rgb(250, 250, 250);
+  border-left: 2px solid #ffffff;
   font-weight: bold;
   color: #000000;
   padding-right: 100px;
@@ -160,25 +166,28 @@
   z-index: 1;
   position: relative;
   transition:
+    border-left 0.3s ease,
     color 0.3s ease,
-    background-color 0.3s ease;
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 /* Folder Tab Active Hover*/
 .editor-card-tab.active:hover {
-  background-color: #e0e0e0;
-  color: #6f6f6f;
-  transition:
-    color 0.3s ease,
-    background-color 0.3s ease;
+  background:  rgb(250, 250, 250);
+  cursor: auto;
 }
 
 /* Folder Tab Inactive Hover */
 .editor-card-tab:hover {
   background-color: #047bb3;
+  transform: scale(1, 1.06);
   transition:
+    transform 0.2s ease,
+    border-left 0.3s ease,
     color 0.3s ease,
-    background-color 0.3s ease;
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .editor-card-tab:hover:active {
@@ -188,48 +197,75 @@
 /* Categories */
 .editor-container {
   display: flex;
-  width: 100%;
-  height: 830px;
+  width: 99%;
+  min-height: 93%;
   box-sizing: border-box;
 }
 
 .categories-container {
   width: 25%;
   z-index: 1;
-  background: #f4f4f4;
+  background:  rgb(250, 250, 250);
   padding: 20px;
   border-bottom-left-radius: 8px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 4;
+  position: relative;
+}
+
+/* Line Between Categories and Subcategories Panels */
+.categories-container::before {
+  content: '';  
+  position: absolute;
+  right: 0; 
+  top: 20px; 
+  bottom: 20px; 
+  width: 2px; 
+  background-color: #e7e7e7;  
 }
 
 .categories-list {
   margin-top: 10px;
 }
 
-.category-button {
+.category-item {
   display: flex;
-  width: 100px;
-  padding: 10px;
-  margin-top: 7px;
-  
+  gap: 5px;
+}
+
+/* Individual Category Buttons to Open in Sub-Category Panel */
+.category-button {
+  display: column;
+  cursor: pointer;
+  margin-top: 10px;
+  gap: 30px;
+  min-width: 86%;
+  padding: 11px;
+  font-size: 16px;
+  align-items: center;
+  justify-content: center;
   background-color: #04548b;
   color: #ffffff;
   border: 1px transparent;
   border-radius: 8px;
-  cursor: pointer;
   box-shadow: 0 3px 0px #033f64;
   transition:
-    box-shadow 0.3s ease,
-    transform 0.2s ease,
-    background-color 0.3s ease;
-  font-size: 15px;
+      box-shadow 0.3s ease,
+      transform 0.2s ease,
+      background-color 0.3s ease;
   font-weight: bold;
 }
 
 .category-button:hover {
-  background: #ddd;
+  box-shadow: 0 6px 0px #045b91;
+  transform: translateY(-2px);
+  background-color: #047bb3;
 }
 
+.category-button:active {
+  transform: translateY(0.1px);
+}
+
+/* Add Category Name */
 .add-category {
   margin-top: 20px;
   display: flex;
@@ -238,9 +274,10 @@
 
 .add-category input {
   flex: 1;
-  padding: 8px;
+  padding: 11px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  margin-bottom: 10px;
 }
 
 .add-category input:focus {
@@ -248,6 +285,7 @@
   outline: none;
 }
 
+/* Add Category + Button */
 .add-category button {
   width: 40px;
   background-color: #04548b;
@@ -262,6 +300,7 @@
     background-color 0.3s ease;
   font-size: 15px;
   font-weight: bold;
+  margin-bottom: 10px;
 }
 
 .add-category button:hover {
@@ -270,10 +309,85 @@
   background-color: #047bb3;
 }
 
+.add-category button:active {
+  transform: translateY(0.1px);
+}
+
+/* Full Category/Sub-Category Panel */
 .category-editing-panel {
   flex: 1;
-  background: white;
+  background:  rgb(250, 250, 250);
   padding: 20px;
   border-bottom-right-radius: 8px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 3;
+  border-top-right-radius: 8px;
+}
+
+/* Preview Button */
+.preview-button {
+  display: flex;
+  cursor: pointer;
+  margin-top: 10px;
+  gap: 30px;
+  width: 20%;
+  padding: 11px;
+  font-size: 16px;
+  align-items: center;
+  justify-content: center;
+  background-color: #04548b;
+  color: #ffffff;
+  border: 1px transparent;
+  border-radius: 8px;
+  box-shadow: 0 3px 0px #033f64;
+  transition:
+      box-shadow 0.3s ease,
+      transform 0.2s ease,
+      background-color 0.3s ease;
+  font-weight: bold;
+  position: relative; 
+  top: 90%; 
+  left: 79%; 
+}
+
+.preview-button:hover {
+  box-shadow: 0 6px 0px #045b91;
+  transform: translateY(-2px);
+  background-color: #047bb3;
+}
+
+.preview-button:active {
+  transform: translateY(0.1px);
+}
+
+/* Delete Button */
+.delete-button {
+  display: row;
+  cursor: pointer;
+  margin-top: 10px;
+  gap: 30px;
+  width: 87%;
+  padding: 11px;
+  font-size: 16px;
+  align-items: center;
+  justify-content: center;
+  background-color: #992f2f;
+  color: #ffffff;
+  border: 1px transparent;
+  border-radius: 8px;
+  box-shadow: 0 3px 0px #680909;
+  transition:
+      box-shadow 0.3s ease,
+      transform 0.2s ease,
+      background-color 0.3s ease;
+  font-weight: bold;
+}
+
+.delete-button:hover {
+  box-shadow: 0 6px 0px #940404;
+  transform: translateY(-2px);
+  background-color: #bd2727;
+}
+
+.delete-button:active {
+  transform: translateY(0.1px);
 }

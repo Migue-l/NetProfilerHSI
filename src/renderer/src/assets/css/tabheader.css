@@ -55,7 +55,7 @@
 
 /* Settings Tab */
 .settings-tab {
-  width: 5%;
+  padding: 8px 22px;
   margin-left: auto;
   margin-right: 20px;
   padding-right: 20px;
@@ -63,16 +63,9 @@
 
 /* Settings Tab Active */
 .settings-tab.active {
-  width: 5%;
   margin-left: auto;
   margin-right: 20px;
   padding-right: 20px;
-}
-
-/* Settings Icon */
-.settings-icon {
-  width: 20px;
-  transform: translateY(3px);
 }
 
 /* Folder Tab Active Hover*/

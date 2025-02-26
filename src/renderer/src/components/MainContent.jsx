@@ -40,7 +40,8 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
   
     return `${header}\n${separator}\n${rows}`;
   };
-// needed to render content in editor
+
+  // needed to render content in editor
   const [activeEditorCard, setActiveEditorCard] = useState('New Card 1');
   const [categories, setCategories] = useState(["Category 1", "Category 2"]);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -51,6 +52,10 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
       setCategories([...categories, newCategory]);
       setNewCategory("");
     }
+  };
+
+  const deleteCategory = (categoryToDelete) => {
+    setCategories(categories.filter(category => category !== categoryToDelete));
   };
 
   const selectRootDirectory = async () => {
@@ -144,6 +149,7 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
     });
   };
 
+
   return (
     <div className="main-content">
       {activeTab === "My Cards" && (
@@ -182,30 +188,38 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
       {activeTab==="Editor" && activeEditorCard === "New Card 1" && (
         <div className="editor-container">
           <div className="categories-container">
-            <div className="categories-list">
-              {categories.map((category, index) => (
-                <button
-                  key={index}
-                  className="category-button"
-                  onClick={() => setSelectedCategory(category)}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
             <div className="add-category">
-              <input
-                type="text"
-                placeholder="New category"
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-              />
-              <button onClick={addCategory}>+</button>
+                <input
+                  type="text"
+                  placeholder="New Category"
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                />
+                <button onClick={addCategory}>+</button>
+              </div>
+              <div className="categories-list">
+              {categories.map((category, index) => (
+                <div key={index} className="category-item">
+                  <button
+                    className="category-button"
+                    onClick={() => setSelectedCategory(category)}
+                  >
+                    {category}
+                  </button>
+                  <button
+                    className="delete-button"
+                    onClick={() => deleteCategory(category)}  // Delete category when clicked
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
 
           <div className="category-editing-panel">
             Editing {selectedCategory}
+              <button className="preview-button">Preview Card</button>
            </div>
         </div>
       )}

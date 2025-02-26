@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import useServerResponse from '../../../hooks/useServerResponse';
 
-const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, setActiveTab }) => {
+const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, setActiveTab, refreshKey}) => {
   const [csvData, setCsvData] = useServerResponse('Waiting for csv data...');
   const [selectedDirectory, setLocalSelectedDirectory] = useState('');
   const [entries, setEntries] = useState([]);
@@ -99,6 +99,10 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
       console.error('Error refreshing directory:', error);
     }
   };
+
+  useEffect(() => {
+    refreshDirectory();
+  }, [refreshKey]);
 
   const toggleDeck = (deckName) => {
     setExpandedDecks((prev) => ({

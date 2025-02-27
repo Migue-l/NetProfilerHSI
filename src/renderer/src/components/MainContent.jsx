@@ -279,9 +279,26 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
               Choose a Deck
             </button>
             <div className="settings-text">Default card categories:</div>
-            <button className="choose-export-or-deck">
-              Choose Categories
-            </button>
+            <input
+                type="text"
+                className="default-categories"
+                placeholder="Personal, Contact, Immigration, Vehicle, Affiliation, Criminal, Case Notes"
+              />
+          </div>
+
+          <div className="indivdual-settings-containers"><b>Batch Exports:</b>
+            <div class="text" className="settings-text">Prompt for each file save
+            <label class="container">
+                <input type="checkbox"/>
+                <span class="checkmark"></span>
+              </label>
+            </div>
+             <div className="settings-text">Run in background
+              <label class="container">
+                <input type="checkbox"/>
+                <span class="checkmark"></span>
+              </label>
+            </div>
           </div>
         </div>
       )}

@@ -42,7 +42,7 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
   };
 
   const [activeEditorCard, setActiveEditorCard] = useState('New Card 1');
-  const [categories, setCategories] = useState(["Category 1", "Category 2"]);
+  const [categories, setCategories] = useState(["Personal", "Contact", "Immigration", "Vehicle", "Affiliation", "Criminal"]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [newCategory, setNewCategory] = useState("");
 

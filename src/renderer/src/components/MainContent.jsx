@@ -156,7 +156,7 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
     if (selectedCard) {
       const cardDetails = JSON.stringify(selectedCard); // Serialize the selected card details
   
-      const previewWindow = window.open('about:blank', '_blank'); // Open a new blank window
+      const previewWindow = window.open('blank', '_blank'); // Open a new blank window
   
       if (previewWindow) {
         // Write HTML content directly to the new window's document

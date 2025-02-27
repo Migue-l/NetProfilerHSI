@@ -125,6 +125,7 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
   const handleCsvItemClick = (item) => {
     console.log("CSV item clicked:", item);
     setSelectedCsvItem(item); // Set the selected item to highlight
+    onCsvSelect(item);
   };
 
   return (

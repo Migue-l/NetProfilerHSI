@@ -199,3 +199,14 @@
   width: 90%;
   opacity: 0.3;
 }
+
+.csv-item {
+  cursor: pointer;
+  padding: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.csv-item.selected {
+  background-color: #f0f8ff; /* Light blue background when selected */
+  font-weight: bold; /* Optional: Makes text bold when selected */
+}

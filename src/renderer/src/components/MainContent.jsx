@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import useServerResponse from '../../../hooks/useServerResponse';
 
-const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, setActiveTab, refreshKey}) => {
+const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, setActiveTab, refreshKey }) => {
   const [csvData, setCsvData] = useServerResponse('Waiting for csv data...');
   const [selectedDirectory, setLocalSelectedDirectory] = useState('');
   const [entries, setEntries] = useState([]);
@@ -41,7 +41,6 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
     return `${header}\n${separator}\n${rows}`;
   };
 
-  // needed to render content in editor
   const [activeEditorCard, setActiveEditorCard] = useState('New Card 1');
   const [categories, setCategories] = useState(["Category 1", "Category 2"]);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -153,7 +152,33 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
     });
   };
 
-
+  const handlePreviewClick = () => {
+    if (selectedCard) {
+      const cardDetails = JSON.stringify(selectedCard); // Serialize the selected card details
+  
+      const previewWindow = window.open('about:blank', '_blank'); // Open a new blank window
+  
+      if (previewWindow) {
+        // Write HTML content directly to the new window's document
+        previewWindow.document.write(`
+          <html>
+            <head>
+              <title>Preview Card</title>
+            </head>
+            <body>
+              <h1>Preview Card: ${selectedCard.name}</h1>
+              <p><b>Details:</b> ${selectedCard.details}</p>
+              <p><b>CSV Content:</b></p>
+              <pre>${csvData}</pre>
+            </body>
+          </html>
+        `);
+  
+        previewWindow.document.close(); // Close the document to apply the content
+      }
+    }
+  }; 
+  
   return (
     <div className="main-content">
       {activeTab === "My Cards" && (
@@ -189,19 +214,19 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         </header>
       )}
 
-      {activeTab==="Editor" && activeEditorCard === "New Card 1" && (
+      {activeTab === "Editor" && activeEditorCard === "New Card 1" && (
         <div className="editor-container">
           <div className="categories-container">
             <div className="add-category">
-                <input
-                  type="text"
-                  placeholder="New Category"
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
-                />
-                <button onClick={addCategory}>+</button>
-              </div>
-              <div className="categories-list">
+              <input
+                type="text"
+                placeholder="New Category"
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+              />
+              <button onClick={addCategory}>+</button>
+            </div>
+            <div className="categories-list">
               {categories.map((category, index) => (
                 <div key={index} className="category-item">
                   <button
@@ -223,8 +248,13 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
 
           <div className="category-editing-panel">
             Editing {selectedCategory}
-              <button className="preview-button">Preview Card</button>
-           </div>
+            <button
+              className="preview-button"
+              onClick={handlePreviewClick} // Attach the preview handler here
+            >
+              Preview Card
+            </button>
+          </div>
         </div>
       )}
 
@@ -249,29 +279,9 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
               Choose a Deck
             </button>
             <div className="settings-text">Default card categories:</div>
-            <input
-              type="text"
-              className="default-categories"
-              placeholder="Personal, Contact, Immigration, Vehicle, Affiliation, Criminal, Case Notes"
-            />
-          </div>
-
-          <div className="indivdual-settings-containers">
-            <b>Batch Exports:</b>
-            <div className="settings-text">
-              Prompt for each file save
-              <label className="container">
-                <input type="checkbox" />
-                <span className="checkmark"></span>
-              </label>
-            </div>
-            <div className="settings-text">
-              Run in background
-              <label className="container">
-                <input type="checkbox" />
-                <span className="checkmark"></span>
-              </label>
-            </div>
+            <button className="choose-export-or-deck">
+              Choose Categories
+            </button>
           </div>
         </div>
       )}

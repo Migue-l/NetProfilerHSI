@@ -44,12 +44,40 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
   const [activeEditorCard, setActiveEditorCard] = useState('New Card 1');
   const [categories, setCategories] = useState(["Personal", "Contact", "Immigration", "Vehicle", "Affiliation", "Criminal"]);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [newCategory, setNewCategory] = useState("");
 
+  /*const addCategory = () => {
+    const userInput = window.prompt("Enter name for new category (Max 20 chars):");
+    if (userInput) {
+      // Limit to 20 chars
+      const trimmedInput = userInput.trim().substring(0, 20); 
+      // Only allow alphanumeric names and "-" "_" " " to seperate multi-word names
+      const validFormat = /^[a-zA-Z0-9-_\s]+$/.test(trimmedInput); 
+      if (validFormat) {
+        setCategories([...categories, newCategory]);
+        setNewCategory(trimmedInput);
+      } else {
+        alert("Invalid category name. Only letters, numbers, '-' and '_' are allowed.");
+      }
+    }
+  };*/
+
+  const handleCategoryChange = (e) => {
+    setNewCategory(e.target.value);
+  };
+
   const addCategory = () => {
-    if (newCategory.trim() !== "") {
-      setCategories([...categories, newCategory]);
+    // Limit input string to 20 characters
+    const trimmedInput = newCategory.trim().substring(0, 20);
+    // Only allow alphanumeric names and "-" "_" " " to seperate multi-word names 
+    const validFormat = /^[a-zA-Z0-9-_\s]+$/.test(trimmedInput);
+    if (validFormat) {
+      setCategories([...categories, trimmedInput]);
       setNewCategory("");
+      setIsAddingCategory(false);
+    } else {
+      alert("Invalid category name. Only letters, numbers, '-', and '_' are allowed.");
     }
   };
 
@@ -214,49 +242,59 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         </header>
       )}
 
-      {activeTab === "Editor" && activeEditorCard === "New Card 1" && (
-        <div className="editor-container">
-          <div className="categories-container">
-            <div className="add-category">
-              <input
-                type="text"
-                placeholder="New Category"
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-              />
-              <button onClick={addCategory}>+</button>
-            </div>
-            <div className="categories-list">
-              {categories.map((category, index) => (
-                <div key={index} className="category-item">
-                  <button
-                    className="category-button"
-                    onClick={() => setSelectedCategory(category)}
-                  >
-                    {category}
-                  </button>
-                  <button
-                    className="delete-button"
-                    onClick={() => deleteCategory(category)}  // Delete category when clicked
-                  >
-                    X
-                  </button>
-                </div>
-              ))}
-            </div>
+{activeTab === "Editor" && activeEditorCard === "New Card 1" && (
+      <div className="editor-container">
+        <div className="categories-container">
+          <div className="add-category">
+            {isAddingCategory ? (
+              <div className="add-category">
+                <input
+                  type="text"
+                  placeholder="Enter category name"
+                  value={newCategory}
+                  onChange={handleCategoryChange}
+                  maxLength={20}
+                />
+                <button onClick={addCategory}>OK</button>
+                <button onClick={() => setIsAddingCategory(false)}>Cancel</button>
+              </div>
+            ) : (
+              // Update state and add new category when btn is pressed
+              <button onClick={() => setIsAddingCategory(true)}>+</button>
+            )}
           </div>
 
-          <div className="category-editing-panel">
-            Editing {selectedCategory}
-            <button
-              className="preview-button"
-              onClick={handlePreviewClick} // Attach the preview handler here
-            >
-              Preview Card
-            </button>
+          <div className="categories-list">
+            {categories.map((category, index) => (
+              <div key={index} className="category-item">
+                <button
+                  className="category-button"
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category}
+                </button>
+                <button
+                  className="delete-button"
+                  onClick={() => deleteCategory(category)}
+                >
+                  X
+                </button>
+              </div>
+            ))}
           </div>
         </div>
-      )}
+
+        <div className="category-editing-panel">
+          Editing {selectedCategory}
+          <button
+            className="preview-button"
+            onClick={handlePreviewClick}
+          >
+            Preview Card
+          </button>
+        </div>
+      </div>
+    )}
 
       {activeTab === 'Settings' && (
         <div className="settings-container">
@@ -303,7 +341,7 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         </div>
       )}
     </div>
-  );
+  )
 };
 
 export default MainContent;

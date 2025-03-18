@@ -11,6 +11,7 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
   const [selectedLocation, setSelectedLocation] = useState('');
   const [csvEntries, setCsvEntries] = useState([]); // State to hold CSV names
   const fileInputRef = useRef(null);
+  const [selectedFile, setSelectedFile] = useState('');
 
   // State to hold data for the scrollable box
   const [scrollBoxData, setScrollBoxData] = useState([]);
@@ -22,26 +23,6 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
   useEffect(() => {
     setSelectedLocation('');
   }, [selectedDirectory]);
-
-  // Fetch CSV data on component mount
-  useEffect(() => {
-    fetchCsvData();
-  }, []);
-
-  const fetchCsvData = async () => {
-    try {
-      const response = await fetch('http://127.0.0.1:5000/api/get-csv-data');
-      if (!response.ok) throw new Error('Failed to fetch CSV data');
-      
-      const data = await response.json();
-      console.log("Fetched CSV Data:", data); // Debugging log
-
-      setCsvEntries(data.names || []);
-      setScrollBoxData(data.names || []); // Set the initial scroll box data
-    } catch (error) {
-      console.error('Error fetching CSV data:', error);
-    }
-  };
 
   const fetchNewCardData = async () => {
     const uniqueCardName = `Net-Card-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}`;
@@ -95,32 +76,57 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
     if (fileInputRef.current) fileInputRef.current.click();
   };
 
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const formData = new FormData();
-      formData.append('csv_file', file);
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
+  };
 
-      // Send the file to the server
-      fetch('/api/upload-csv', {
-        method: 'POST',
-        body: formData // Assuming formData contains the uploaded file
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.updated_data) {
-          // Update the scrollable box with the new data from the updated CSV
-          setScrollBoxData(data.updated_data);
+  // Upload the selected file
+  const handleFileUpload = async () => {
+    if (!selectedFile) {
+      alert("Please select a file first!");
+      return;
+    }
 
-          // Optionally, fetch the updated CSV data (if needed)
-          fetchCsvData();
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    try {
+      const response = await fetch("http://127.0.0.1:5000/api/upload-csv", {
+        method: "POST",
+        body: formData,
       });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert("File uploaded successfully!");
+        fetchCsvData(); // Refresh the scrollable box
+      } else {
+        alert(result.error);
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
     }
   };
+
+  // Fetch CSV data for scrollable box
+  const fetchCsvData = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:5000/api/get-csv-data");
+      const result = await response.json();
+      if (response.ok) {
+        setScrollBoxData(result.names || []);
+      } else {
+        console.error(result.error);
+      }
+    } catch (error) {
+      console.error("Error fetching CSV data:", error);
+    }
+  };
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchCsvData();
+  }, []);
 
   const handleCsvItemClick = (item) => {
     console.log("CSV item clicked:", item);

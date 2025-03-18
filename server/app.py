@@ -107,10 +107,10 @@ def newDeck():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
 
 @app.route('/api/upload-csv', methods=['POST'])
 def upload_csv():
-    """Handles CSV file upload and appends the data to test.csv."""
     try:
         if 'file' not in request.files:
             return jsonify({'error': 'No file provided'}), 400
@@ -119,20 +119,19 @@ def upload_csv():
         if file.filename == '':
             return jsonify({'error': 'No file selected'}), 400
 
-        # Path to test.csv in the server folder
+        # Define path for test.csv
         csv_file_path = os.path.join(os.path.dirname(__file__), "test.csv")
-        print("CSV file path:", csv_file_path)  # Debugging line
 
-        # Load existing CSV if available, else create an empty DataFrame
+        # Read existing CSV or create an empty DataFrame if not present
         if os.path.exists(csv_file_path):
-            existing_data = pd.read_csv(csv_file_path, dtype=str)  # Ensure data remains as string
+            existing_data = pd.read_csv(csv_file_path, dtype=str)
         else:
             existing_data = pd.DataFrame()
 
-        # Read the newly uploaded CSV file
+        # Read uploaded CSV
         new_data = pd.read_csv(file, dtype=str)
 
-        # Ensure column headers match before appending
+        # If test.csv exists, ensure column consistency
         if not existing_data.empty and list(existing_data.columns) != list(new_data.columns):
             return jsonify({'error': 'Uploaded CSV does not match the required format'}), 400
 
@@ -140,15 +139,15 @@ def upload_csv():
         combined_data = pd.concat([existing_data, new_data], ignore_index=True)
         combined_data.to_csv(csv_file_path, index=False)  # Save back to test.csv
 
-        # Now return the updated data
+        # Return updated data
         return jsonify({
             'message': 'CSV uploaded successfully',
-            'file_path': csv_file_path,
-            'updated_data': combined_data.to_dict(orient="records")  # Sending updated data back
+            'updated_data': combined_data.to_dict(orient="records")
         }), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 
 @app.route('/api/get-csv-data', methods=['GET'])

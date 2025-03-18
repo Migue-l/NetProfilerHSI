@@ -81,11 +81,16 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
   };
 
   // Upload the selected file
-  const handleFileUpload = async () => {
-    if (!selectedFile) {
+  const handleFileUpload = async (event) => {
+
+    const file = event.target.files[0]; // Get the file directly from the event
+
+    if (!file) {
       alert("Please select a file first!");
       return;
     }
+
+    setSelectedFile(file); // Update state (though it's not needed immediately here)
 
     const formData = new FormData();
     formData.append("file", selectedFile);

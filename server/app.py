@@ -113,11 +113,15 @@ def newDeck():
 def upload_csv():
     try:
         if 'file' not in request.files:
+            print("DEBUG: No file found in request")
             return jsonify({'error': 'No file provided'}), 400
 
         file = request.files['file']
         if file.filename == '':
+            print("DEBUG: Empty filename")
             return jsonify({'error': 'No file selected'}), 400
+        
+        print(f"DEBUG: Recieved file- {file.filename}")
 
         # Define path for test.csv
         csv_file_path = os.path.join(os.path.dirname(__file__), "test.csv")
@@ -131,12 +135,24 @@ def upload_csv():
         # Read uploaded CSV
         new_data = pd.read_csv(file, dtype=str)
 
-        # If test.csv exists, ensure column consistency
-        if not existing_data.empty and list(existing_data.columns) != list(new_data.columns):
-            return jsonify({'error': 'Uploaded CSV does not match the required format'}), 400
+        existing_columns = [col.strip().lower() for col in existing_data.columns]
+        new_columns = [col.strip() for col in new_data.columns]
+
+        print("DEBUG: Existing columns:", existing_columns)
+        print("DEBUG: Uploaded columns:", new_columns)
+
+        if set(existing_columns) != set(new_columns):
+            missing = set(existing_columns) - set(new_columns)
+            extra = set(new_columns) - set(existing_columns)
+            return jsonify({'error': 'Uploaded CSV does not match the required format', 
+                    'missing_columns': list(missing), 
+                    'extra_columns': list(extra)}), 400
 
         # Append new data
         combined_data = pd.concat([existing_data, new_data], ignore_index=True)
+
+        combined_data = combined_data.map(lambda x: None if isinstance(x, float) and np.isnan(x) else x)
+
         combined_data.to_csv(csv_file_path, index=False)  # Save back to test.csv
 
         # Return updated data
@@ -166,7 +182,7 @@ def get_csv_data():
         if "Name" not in df.columns:
             return jsonify({"error": "CSV file does not contain 'Name' column"}), 400
 
-        names_list = df["Name"].tolist()
+        names_list = df["Name"].dropna().tolist()
 
         return jsonify({"names": names_list}), 200
 

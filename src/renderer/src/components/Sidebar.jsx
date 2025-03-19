@@ -82,7 +82,7 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
 
   // Upload the selected file
   const handleFileUpload = async (event) => {
-
+    
     const file = event.target.files[0]; // Get the file directly from the event
 
     if (!file) {
@@ -93,7 +93,7 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
     setSelectedFile(file); // Update state (though it's not needed immediately here)
 
     const formData = new FormData();
-    formData.append("file", selectedFile);
+    formData.append("file", file);
 
     try {
       const response = await fetch("http://127.0.0.1:5000/api/upload-csv", {
@@ -103,9 +103,11 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
 
       const result = await response.json();
       if (response.ok) {
+        console.log("File uploaded successfully:", result); // log successful result
         alert("File uploaded successfully!");
-        fetchCsvData(); // Refresh the scrollable box
+        await fetchCsvData(); // Refresh the scrollable box
       } else {
+        console.error("Error response from backend:", result);
         alert(result.error);
       }
     } catch (error) {
@@ -119,9 +121,11 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
       const response = await fetch("http://127.0.0.1:5000/api/get-csv-data");
       const result = await response.json();
       if (response.ok) {
-        setScrollBoxData(result.names || []);
+        console.log("Fetched CSV Data:", result.names)// Debugging log
+        setScrollBoxData(result.names || []); // Update state with new names
+        console.log("Updated State:", scrollBoxData); // check if state is updating
       } else {
-        console.error(result.error);
+        console.error("Error fetching CSV data:", result.error);
       }
     } catch (error) {
       console.error("Error fetching CSV data:", error);
@@ -133,9 +137,10 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
     fetchCsvData();
   }, []);
 
-  const handleCsvItemClick = (item) => {
+  const handleCsvItemClick = async (item) => {
     console.log("CSV item clicked:", item);
     setSelectedCsvItem(item); // Set the selected item to highlight
+    await fetchCsvData();
     onCsvSelect(item);
   };
 

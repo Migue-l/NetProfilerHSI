@@ -6,7 +6,10 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
     const [selectedDirectory, setLocalSelectedDirectory] = useState('');
     const [entries, setEntries] = useState([]);
     const [expandedDecks, setExpandedDecks] = useState({});
-    const [selectedCard, setSelectedCard] = useState(null);
+
+    // Instead of a single selectedCard, we maintain an array of open cards
+    const [openCards, setOpenCards] = useState([]);
+    const [activeCardIndex, setActiveCardIndex] = useState(null);
 
     const fetchCsvContent = async () => {
         try {
@@ -16,7 +19,6 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
             }
             const data = await response.json();
             console.log("CSV Data Response:", data);
-
             if (!data.data || data.data.length === 0) {
                 return 'Error: Empty CSV file.';
             }
@@ -34,8 +36,6 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         const rows = jsonData.data.map(row => jsonData.columns.map(col => row[col]).join(' | ')).join('\n');
         return `${header}\n${separator}\n${rows}`;
     };
-
-    // We removed the two-tab logic for "New Card 1" / "New Card 2"
 
     const [categories, setCategories] = useState(["Personal", "Contact", "Immigration", "Vehicle", "Affiliation", "Criminal"]);
     const [selectedCategory, setSelectedCategory] = useState(null);
@@ -112,14 +112,25 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
 
     const handleCardClick = async (cardName, details) => {
         console.log(`Clicked card: ${cardName}`, details);
-        setSelectedCard({ name: cardName, details });
+        // Check if the card is already open
+        const existingIndex = openCards.findIndex(card => card.name === cardName);
+        let newOpenCards = [...openCards];
+        let newActiveIndex = activeCardIndex;
+        if (existingIndex === -1) {
+            const newCard = { name: cardName, details };
+            newOpenCards.push(newCard);
+            newActiveIndex = newOpenCards.length - 1;
+        } else {
+            newActiveIndex = existingIndex;
+        }
+        setOpenCards(newOpenCards);
+        setActiveCardIndex(newActiveIndex);
 
         // Always fetch CSV data when a card is clicked
         const csvContent = await fetchCsvContent();
         console.log(`CSV Content Received:`, csvContent);
         setCsvData(csvContent);
 
-        // Switch tab to Editor
         setActiveTab("Editor");
     };
 
@@ -131,7 +142,6 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         return sortedEntries.map(([name, details]) => {
             console.log("Rendering card details for:", name, details);
             const deckPath = parentPath ? `${parentPath}/${name}` : name;
-
             return (
                 <div key={deckPath} className="entry-wrapper">
                     {details?.type === "Deck" ? (
@@ -155,9 +165,25 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         });
     };
 
+    const handleTabClick = (index) => {
+        setActiveCardIndex(index);
+    };
+
+    const closeTab = (index, e) => {
+        e.stopPropagation();
+        const updatedCards = openCards.filter((_, i) => i !== index);
+        setOpenCards(updatedCards);
+        if (activeCardIndex === index) {
+            setActiveCardIndex(updatedCards.length > 0 ? 0 : null);
+        } else if (activeCardIndex > index) {
+            setActiveCardIndex(activeCardIndex - 1);
+        }
+    };
+
     const handlePreviewClick = () => {
-        if (selectedCard) {
-            const cardDetails = JSON.stringify(selectedCard);
+        if (activeCardIndex !== null && openCards[activeCardIndex]) {
+            const card = openCards[activeCardIndex];
+            const cardDetails = JSON.stringify(card);
             const previewWindow = window.open('blank', '_blank');
             if (previewWindow) {
                 previewWindow.document.write(`
@@ -166,8 +192,8 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                         <title>Preview Card</title>
                       </head>
                       <body>
-                        <h1>Preview Card: ${selectedCard.name}</h1>
-                        <p><b>Details:</b> ${selectedCard.details}</p>
+                        <h1>Preview Card: ${card.name}</h1>
+                        <p><b>Details:</b> ${card.details}</p>
                         <p><b>CSV Content:</b></p>
                         <pre>${csvData}</pre>
                       </body>
@@ -180,7 +206,6 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
 
     return (
         <div className="main-content">
-            {/* MY CARDS TAB */}
             {activeTab === "My Cards" && (
                 <div>
                     <button onClick={selectRootDirectory} className="select-dir-button">
@@ -196,20 +221,26 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                 </div>
             )}
 
-            {/* EDITOR TAB */}
             {activeTab === "Editor" && (
                 <>
-                    {selectedCard ? (
-                        <>
-                            {/* Editor Header - single tab labeled by the selected card's title */}
-                            <header className="editor-card-header">
-                                <div className="editor-card-tab active">
-                                    {selectedCard.details.title || selectedCard.name}
-                                </div>
-                            </header>
+                    {/* Editor Tab Header */}
+                    <header className="editor-card-header">
+                        {openCards.map((card, index) => (
+                            <div
+                                key={index}
+                                className={`editor-card-tab ${index === activeCardIndex ? "active" : ""}`}
+                                onClick={() => handleTabClick(index)}
+                            >
+                                {card.details.title || card.name}
+                                <button onClick={(e) => closeTab(index, e)}>x</button>
+                            </div>
+                        ))}
+                    </header>
 
-                            {/* Editor Body */}
-                            <div className="editor-container">
+                    {/* Editor Body */}
+                    <div className="editor-container">
+                        {activeCardIndex !== null && openCards[activeCardIndex] ? (
+                            <>
                                 <div className="categories-container">
                                     <div className="add-category">
                                         {isAddingCategory ? (
@@ -228,10 +259,9 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                             <button onClick={() => setIsAddingCategory(true)}>+</button>
                                         )}
                                     </div>
-
                                     <div className="categories-list">
-                                        {categories.map((category, index) => (
-                                            <div key={index} className="category-item">
+                                        {categories.map((category, idx) => (
+                                            <div key={idx} className="category-item">
                                                 <button
                                                     className="category-button"
                                                     onClick={() => setSelectedCategory(category)}
@@ -248,26 +278,20 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                         ))}
                                     </div>
                                 </div>
-
                                 <div className="category-editing-panel">
                                     Editing {selectedCategory}
-                                    <button
-                                        className="preview-button"
-                                        onClick={handlePreviewClick}
-                                    >
+                                    <button className="preview-button" onClick={handlePreviewClick}>
                                         Preview Card
                                     </button>
                                 </div>
-                            </div>
-                        </>
-                    ) : (
-                        // If no card is selected, show a simple message
-                        <p>Please select a card from "My Cards" to edit.</p>
-                    )}
+                            </>
+                        ) : (
+                            <p>Please select a card from "My Cards" to edit.</p>
+                        )}
+                    </div>
                 </>
             )}
 
-            {/* SETTINGS TAB */}
             {activeTab === 'Settings' && (
                 <div className="settings-container">
                     <div className="indivdual-settings-containers">

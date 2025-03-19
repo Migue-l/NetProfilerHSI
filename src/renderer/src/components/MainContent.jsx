@@ -16,10 +16,10 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
             }
             const data = await response.json();
             console.log("CSV Data Response:", data);
+
             if (!data.data || data.data.length === 0) {
                 return 'Error: Empty CSV file.';
             }
-            // Convert JSON to readable text format
             return csvToText(data);
         } catch (error) {
             console.error('Error fetching CSV file:', error);
@@ -35,7 +35,8 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         return `${header}\n${separator}\n${rows}`;
     };
 
-    const [activeEditorCard, setActiveEditorCard] = useState('New Card 1');
+    // We removed the two-tab logic for "New Card 1" / "New Card 2"
+
     const [categories, setCategories] = useState(["Personal", "Contact", "Immigration", "Vehicle", "Affiliation", "Criminal"]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [isAddingCategory, setIsAddingCategory] = useState(false);
@@ -112,10 +113,13 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
     const handleCardClick = async (cardName, details) => {
         console.log(`Clicked card: ${cardName}`, details);
         setSelectedCard({ name: cardName, details });
+
         // Always fetch CSV data when a card is clicked
         const csvContent = await fetchCsvContent();
         console.log(`CSV Content Received:`, csvContent);
         setCsvData(csvContent);
+
+        // Switch tab to Editor
         setActiveTab("Editor");
     };
 
@@ -127,6 +131,7 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         return sortedEntries.map(([name, details]) => {
             console.log("Rendering card details for:", name, details);
             const deckPath = parentPath ? `${parentPath}/${name}` : name;
+
             return (
                 <div key={deckPath} className="entry-wrapper">
                     {details?.type === "Deck" ? (
@@ -135,12 +140,13 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                 {name} (Deck) {expandedDecks[deckPath] ? "▲" : "▼"}
                             </button>
                             {expandedDecks[deckPath] && details.contents && (
-                                <div className="nested-entries">{renderEntries(details.contents, deckPath)}</div>
+                                <div className="nested-entries">
+                                    {renderEntries(details.contents, deckPath)}
+                                </div>
                             )}
                         </>
                     ) : (
                         <button className="entry-card" onClick={() => handleCardClick(name, details)}>
-                            {/* Show the user-entered title if available, else fallback to the filename */}
                             {details?.title ? details.title : name} ({details?.type || "Unknown"})
                         </button>
                     )}
@@ -151,10 +157,9 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
 
     const handlePreviewClick = () => {
         if (selectedCard) {
-            const cardDetails = JSON.stringify(selectedCard); // Serialize the selected card details
-            const previewWindow = window.open('blank', '_blank'); // Open a new blank window
+            const cardDetails = JSON.stringify(selectedCard);
+            const previewWindow = window.open('blank', '_blank');
             if (previewWindow) {
-                // Write HTML content directly to the new window's document
                 previewWindow.document.write(`
                     <html>
                       <head>
@@ -168,13 +173,14 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                       </body>
                     </html>
                 `);
-                previewWindow.document.close(); // Close the document to apply the content
+                previewWindow.document.close();
             }
         }
     };
 
     return (
         <div className="main-content">
+            {/* MY CARDS TAB */}
             {activeTab === "My Cards" && (
                 <div>
                     <button onClick={selectRootDirectory} className="select-dir-button">
@@ -184,80 +190,84 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                         Refresh Directory
                     </button>
                     {selectedDirectory && <p>Selected Directory: {selectedDirectory}</p>}
-                    <div className="entries-container">{renderEntries(entries)}</div>
+                    <div className="entries-container">
+                        {renderEntries(entries)}
+                    </div>
                 </div>
             )}
 
+            {/* EDITOR TAB */}
             {activeTab === "Editor" && (
-                <header className="editor-card-header">
-                    <div
-                        className={`editor-card-tab ${activeEditorCard === "New Card 1" ? "active" : ""}`}
-                        onClick={() => setActiveEditorCard("New Card 1")}
-                    >
-                        New Card 1
-                    </div>
-                    <div
-                        className={`editor-card-tab ${activeEditorCard === "New Card 2" ? "active" : ""}`}
-                        onClick={() => setActiveEditorCard("New Card 2")}
-                    >
-                        New Card 2
-                    </div>
-                </header>
+                <>
+                    {selectedCard ? (
+                        <>
+                            {/* Editor Header - single tab labeled by the selected card's title */}
+                            <header className="editor-card-header">
+                                <div className="editor-card-tab active">
+                                    {selectedCard.details.title || selectedCard.name}
+                                </div>
+                            </header>
+
+                            {/* Editor Body */}
+                            <div className="editor-container">
+                                <div className="categories-container">
+                                    <div className="add-category">
+                                        {isAddingCategory ? (
+                                            <div className="add-category">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Enter category name"
+                                                    value={newCategory}
+                                                    onChange={handleCategoryChange}
+                                                    maxLength={20}
+                                                />
+                                                <button onClick={addCategory}>OK</button>
+                                                <button onClick={() => setIsAddingCategory(false)}>Cancel</button>
+                                            </div>
+                                        ) : (
+                                            <button onClick={() => setIsAddingCategory(true)}>+</button>
+                                        )}
+                                    </div>
+
+                                    <div className="categories-list">
+                                        {categories.map((category, index) => (
+                                            <div key={index} className="category-item">
+                                                <button
+                                                    className="category-button"
+                                                    onClick={() => setSelectedCategory(category)}
+                                                >
+                                                    {category}
+                                                </button>
+                                                <button
+                                                    className="delete-button"
+                                                    onClick={() => deleteCategory(category)}
+                                                >
+                                                    X
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="category-editing-panel">
+                                    Editing {selectedCategory}
+                                    <button
+                                        className="preview-button"
+                                        onClick={handlePreviewClick}
+                                    >
+                                        Preview Card
+                                    </button>
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        // If no card is selected, show a simple message
+                        <p>Please select a card from "My Cards" to edit.</p>
+                    )}
+                </>
             )}
 
-            {activeTab === "Editor" && activeEditorCard === "New Card 1" && (
-                <div className="editor-container">
-                    <div className="categories-container">
-                        <div className="add-category">
-                            {isAddingCategory ? (
-                                <div className="add-category">
-                                    <input
-                                        type="text"
-                                        placeholder="Enter category name"
-                                        value={newCategory}
-                                        onChange={handleCategoryChange}
-                                        maxLength={20}
-                                    />
-                                    <button onClick={addCategory}>OK</button>
-                                    <button onClick={() => setIsAddingCategory(false)}>Cancel</button>
-                                </div>
-                            ) : (
-                                <button onClick={() => setIsAddingCategory(true)}>+</button>
-                            )}
-                        </div>
-
-                        <div className="categories-list">
-                            {categories.map((category, index) => (
-                                <div key={index} className="category-item">
-                                    <button
-                                        className="category-button"
-                                        onClick={() => setSelectedCategory(category)}
-                                    >
-                                        {category}
-                                    </button>
-                                    <button
-                                        className="delete-button"
-                                        onClick={() => deleteCategory(category)}
-                                    >
-                                        X
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="category-editing-panel">
-                        Editing {selectedCategory}
-                        <button
-                            className="preview-button"
-                            onClick={handlePreviewClick}
-                        >
-                            Preview Card
-                        </button>
-                    </div>
-                </div>
-            )}
-
+            {/* SETTINGS TAB */}
             {activeTab === 'Settings' && (
                 <div className="settings-container">
                     <div className="indivdual-settings-containers">

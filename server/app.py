@@ -153,7 +153,10 @@ def upload_csv():
         new_data = new_data[EXPECTED_COLUMNS]
 
         # Append new data
-        new_data.to_csv(csv_file_path, mode='a', index=False, header=not file_exists)  # Save back to test.csv
+        with open(csv_file_path, 'a', newline='') as f:
+            if file_exists:
+                f.write("\n")
+            new_data.to_csv(f, index=False, header=not file_exists, lineterminator="\n")  # Save back to test.csv
 
         # Return updated data
         return jsonify({

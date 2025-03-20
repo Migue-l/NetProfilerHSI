@@ -8,7 +8,7 @@ import PDFicon from '../assets/icons/PDFicon.png';
 
 const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, availableDecks }) => {
     const [cardName, setCardName] = useState('');
-    const [cardTitle, setCardTitle] = useState(''); // New state for card title
+    const [cardTitle, setCardTitle] = useState(''); 
     const [selectedLocation, setSelectedLocation] = useState('');
     const [csvEntries, setCsvEntries] = useState([]);
     const fileInputRef = useRef(null);
@@ -52,7 +52,7 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     cardName: uniqueCardName,
-                    title: cardTitle, // Pass the card title to the API
+                    title: cardTitle, // Pass title to aPI
                     location: selectedLocation || "",
                     createdAt: new Date().toISOString()
                 }),
@@ -123,8 +123,6 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
     const handleCsvItemClick = (item) => {
         console.log("CSV item clicked:", item);
         setSelectedCsvItem(item);
-        // If onCsvSelect is not provided as a prop, remove or comment the following line:
-        // onCsvSelect(item);
     };
 
     return (
@@ -138,7 +136,7 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
                         value={cardName}
                         onChange={(e) => setCardName(e.target.value)}
                     />
-                    {/* New input field for card title */}
+                   
                     <input
                         type="text"
                         className="card-title-input"

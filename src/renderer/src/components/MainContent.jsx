@@ -7,9 +7,26 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
     const [entries, setEntries] = useState([]);
     const [expandedDecks, setExpandedDecks] = useState({});
 
-    // Instead of a single selectedCard, we maintain an array of open cards
+    // openCards array stores objects of { name, details, selectedCategory, subcatValues }
     const [openCards, setOpenCards] = useState([]);
     const [activeCardIndex, setActiveCardIndex] = useState(null);
+
+    // States for category buttons (global list)
+    const [categories, setCategories] = useState([
+        "Personal", "Contact", "Immigration", "Vehicle", "Affiliation", "Criminal"
+    ]);
+    const [isAddingCategory, setIsAddingCategory] = useState(false);
+    const [newCategory, setNewCategory] = useState("");
+
+    //  subcategories for each category
+    const categorySubcategories = {
+        Personal: ["First Name", "Last Name", "Alias", "DOB", "COB", "SSN", "Race", "Gender", "Height", "Weight", "Hair color", "Eye color", "Last Known Residence", "Employment"],
+        Contact: ["Phone #", "Email Address", "Date SAR Checked"],
+        Immigration: ["Passport (COC)", "Immigration Status", "SID #", "Travel"],
+        Vehicle: ["Make", "Model", "Vehicle Tag #", "Color"],
+        Affiliation: ["Social Media", "Associated Business"],
+        Criminal: ["Suspected Role", "FBI #", "Active Warrants", "Criminal History", "SAR Activity", "Date SAR Checked", "Case #", "ROA #"]
+    };
 
     const fetchCsvContent = async () => {
         try {
@@ -33,33 +50,10 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         if (!jsonData || !jsonData.columns || !jsonData.data) return 'Invalid data format';
         const header = jsonData.columns.join(' | ');
         const separator = '-'.repeat(header.length);
-        const rows = jsonData.data.map(row => jsonData.columns.map(col => row[col]).join(' | ')).join('\n');
+        const rows = jsonData.data
+            .map(row => jsonData.columns.map(col => row[col]).join(' | '))
+            .join('\n');
         return `${header}\n${separator}\n${rows}`;
-    };
-
-    const [categories, setCategories] = useState(["Personal", "Contact", "Immigration", "Vehicle", "Affiliation", "Criminal"]);
-    const [selectedCategory, setSelectedCategory] = useState(null);
-    const [isAddingCategory, setIsAddingCategory] = useState(false);
-    const [newCategory, setNewCategory] = useState("");
-
-    const handleCategoryChange = (e) => {
-        setNewCategory(e.target.value);
-    };
-
-    const addCategory = () => {
-        const trimmedInput = newCategory.trim().substring(0, 20);
-        const validFormat = /^[a-zA-Z0-9-_\s]+$/.test(trimmedInput);
-        if (validFormat) {
-            setCategories([...categories, trimmedInput]);
-            setNewCategory("");
-            setIsAddingCategory(false);
-        } else {
-            alert("Invalid category name. Only letters, numbers, '-', and '_' are allowed.");
-        }
-    };
-
-    const deleteCategory = (categoryToDelete) => {
-        setCategories(categories.filter(category => category !== categoryToDelete));
     };
 
     const selectRootDirectory = async () => {
@@ -104,7 +98,7 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
     }, [refreshKey]);
 
     const toggleDeck = (deckName) => {
-        setExpandedDecks((prev) => ({
+        setExpandedDecks(prev => ({
             ...prev,
             [deckName]: !prev[deckName]
         }));
@@ -112,12 +106,16 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
 
     const handleCardClick = async (cardName, details) => {
         console.log(`Clicked card: ${cardName}`, details);
-        // Check if the card is already open
         const existingIndex = openCards.findIndex(card => card.name === cardName);
         let newOpenCards = [...openCards];
         let newActiveIndex = activeCardIndex;
         if (existingIndex === -1) {
-            const newCard = { name: cardName, details };
+            const newCard = {
+                name: cardName,
+                details,
+                selectedCategory: null,
+                subcatValues: {}
+            };
             newOpenCards.push(newCard);
             newActiveIndex = newOpenCards.length - 1;
         } else {
@@ -126,19 +124,16 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         setOpenCards(newOpenCards);
         setActiveCardIndex(newActiveIndex);
 
-        // Always fetch CSV data when a card is clicked
         const csvContent = await fetchCsvContent();
         console.log(`CSV Content Received:`, csvContent);
         setCsvData(csvContent);
-
         setActiveTab("Editor");
     };
 
-    const renderEntries = (entries, parentPath = '') => {
-        const sortedEntries = Object.entries(entries).sort((a, b) => {
+    const renderEntries = (entriesObj, parentPath = '') => {
+        const sortedEntries = Object.entries(entriesObj).sort((a, b) => {
             return (a[1]?.type === "Deck" ? -1 : 1) - (b[1]?.type === "Deck" ? -1 : 1);
         });
-
         return sortedEntries.map(([name, details]) => {
             console.log("Rendering card details for:", name, details);
             const deckPath = parentPath ? `${parentPath}/${name}` : name;
@@ -180,25 +175,84 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         }
     };
 
+    // update selectedCategory when cat button is clickeds
+    const handleCategoryClick = (cat) => {
+        setOpenCards(prevCards => {
+            const updatedCards = [...prevCards];
+            if (updatedCards[activeCardIndex]) {
+                updatedCards[activeCardIndex] = {
+                    ...updatedCards[activeCardIndex],
+                    selectedCategory: cat,
+                    subcatValues: updatedCards[activeCardIndex].subcatValues || {}
+                };
+            }
+            return updatedCards;
+        });
+    };
+
+    // Update subcategory value for the active card.
+    const handleSubcatChange = (cat, subcat, value) => {
+        setOpenCards(prevCards => {
+            const updatedCards = [...prevCards];
+            if (updatedCards[activeCardIndex]) {
+                const card = { ...updatedCards[activeCardIndex] };
+                const currentCatData = card.subcatValues[cat] || {};
+                currentCatData[subcat] = value;
+                card.subcatValues[cat] = currentCatData;
+                updatedCards[activeCardIndex] = card;
+            }
+            return updatedCards;
+        });
+    };
+
+    // Save subcategory data for the active card. (api call)
+    const handleSaveSubcatData = async () => {
+        if (activeCardIndex === null || !openCards[activeCardIndex]) return;
+        const currentCard = openCards[activeCardIndex];
+        const subcatData = currentCard.subcatValues || {};
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/update-card-subcat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    cardName: currentCard.name,
+                    subcatData: subcatData
+                }),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Failed to update subcategories: ${errorText}`);
+            }
+
+            const result = await response.json();
+            alert(`Subcategory data saved for ${currentCard.name}: ` + JSON.stringify(result.updatedData));
+
+        } catch (error) {
+            console.error("Error saving subcategory data:", error);
+            alert("Error saving subcategory data: " + error.message);
+        }
+    };
+
     const handlePreviewClick = () => {
         if (activeCardIndex !== null && openCards[activeCardIndex]) {
             const card = openCards[activeCardIndex];
-            const cardDetails = JSON.stringify(card);
             const previewWindow = window.open('blank', '_blank');
             if (previewWindow) {
                 previewWindow.document.write(`
-                    <html>
-                      <head>
-                        <title>Preview Card</title>
-                      </head>
-                      <body>
-                        <h1>Preview Card: ${card.name}</h1>
-                        <p><b>Details:</b> ${card.details}</p>
-                        <p><b>CSV Content:</b></p>
-                        <pre>${csvData}</pre>
-                      </body>
-                    </html>
-                `);
+          <html>
+            <head>
+              <title>Preview Card</title>
+            </head>
+            <body>
+              <h1>Preview Card: ${card.name}</h1>
+              <p><b>Details:</b> ${card.details}</p>
+              <p><b>CSV Content:</b></p>
+              <pre>${csvData}</pre>
+            </body>
+          </html>
+        `);
                 previewWindow.document.close();
             }
         }
@@ -230,6 +284,21 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                 key={index}
                                 className={`editor-card-tab ${index === activeCardIndex ? "active" : ""}`}
                                 onClick={() => handleTabClick(index)}
+                                onContextMenu={(e) => {
+                                    e.preventDefault();
+                                    const newTitle = window.prompt("Enter new title for this card:", card.details.title || card.name);
+                                    if (newTitle !== null) {
+                                        setOpenCards(prevCards => {
+                                            const updatedCards = [...prevCards];
+                                            if (updatedCards[index]) {
+                                                const updatedCard = { ...updatedCards[index] };
+                                                updatedCard.details.title = newTitle;
+                                                updatedCards[index] = updatedCard;
+                                            }
+                                            return updatedCards;
+                                        });
+                                    }
+                                }}
                             >
                                 {card.details.title || card.name}
                                 <button onClick={(e) => closeTab(index, e)}>x</button>
@@ -249,14 +318,14 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                                     type="text"
                                                     placeholder="Enter category name"
                                                     value={newCategory}
-                                                    onChange={handleCategoryChange}
+                                                    onChange={(e) => setNewCategory(e.target.value)}
                                                     maxLength={20}
                                                 />
                                                 <button onClick={addCategory}>OK</button>
                                                 <button onClick={() => setIsAddingCategory(false)}>Cancel</button>
                                             </div>
                                         ) : (
-                                            <button onClick={() => setIsAddingCategory(true)}>+</button>
+                                            <button onClick={() => setIsAddingCategory(true)}>New Category</button>
                                         )}
                                     </div>
                                     <div className="categories-list">
@@ -264,13 +333,32 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                             <div key={idx} className="category-item">
                                                 <button
                                                     className="category-button"
-                                                    onClick={() => setSelectedCategory(category)}
+                                                    onClick={() => handleCategoryClick(category)}
                                                 >
                                                     {category}
                                                 </button>
                                                 <button
                                                     className="delete-button"
-                                                    onClick={() => deleteCategory(category)}
+                                                    onClick={() => {
+                                                        setOpenCards(prevCards => {
+                                                            const updatedCards = [...prevCards];
+                                                            if (updatedCards[activeCardIndex]) {
+                                                                const card = { ...updatedCards[activeCardIndex] };
+                                                                if (card.selectedCategory === category) {
+                                                                    card.selectedCategory = null;
+                                                                }
+                                                                if (card.subcatValues && card.subcatValues[category]) {
+                                                                    const updatedSubcats = { ...card.subcatValues };
+                                                                    delete updatedSubcats[category];
+                                                                    card.subcatValues = updatedSubcats;
+                                                                }
+                                                                updatedCards[activeCardIndex] = card;
+                                                            }
+                                                            return updatedCards;
+                                                        });
+                                                        
+                                                        deleteCategory(category);
+                                                    }}
                                                 >
                                                     X
                                                 </button>
@@ -279,15 +367,36 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                     </div>
                                 </div>
                                 <div className="category-editing-panel">
-                                    Editing {selectedCategory}
-                                    <button className="preview-button" onClick={handlePreviewClick}>
-                                        Preview Card
-                                    </button>
+                                    {openCards[activeCardIndex].selectedCategory ? (
+                                        <>
+                                            <h2>Editing {openCards[activeCardIndex].selectedCategory}</h2>
+                                            {categorySubcategories[openCards[activeCardIndex].selectedCategory]?.map(subcat => {
+                                                const currentValue = openCards[activeCardIndex].subcatValues?.[openCards[activeCardIndex].selectedCategory]?.[subcat] || "";
+                                                return (
+                                                    <div key={subcat} style={{ marginBottom: '8px' }}>
+                                                        <label>
+                                                            {subcat}:
+                                                            <input
+                                                                type="text"
+                                                                value={currentValue}
+                                                                onChange={e => handleSubcatChange(openCards[activeCardIndex].selectedCategory, subcat, e.target.value)}
+                                                                style={{ marginLeft: '8px' }}
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                );
+                                            })}
+                                            <button onClick={handleSaveSubcatData}>Save</button>
+                                            <button className="preview-button" onClick={handlePreviewClick}>
+                                                Preview Card
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <p>Please select a category to edit subcategories.</p>
+                                    )}
                                 </div>
                             </>
-                        ) : (
-                            <p>Please select a card from "My Cards" to edit.</p>
-                        )}
+                        ) : null}
                     </div>
                 </>
             )}

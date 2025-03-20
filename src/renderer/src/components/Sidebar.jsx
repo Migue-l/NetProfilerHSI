@@ -6,7 +6,7 @@ import DeckOfCards from '../assets/icons/DeckofCards.png';
 import CSVicon from '../assets/icons/CSVicon.png';
 import PDFicon from '../assets/icons/PDFicon.png';
 
-const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, availableDecks }) => {
+const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, availableDecks, onRefresh }) => {
     const [cardName, setCardName] = useState('');
     const [cardTitle, setCardTitle] = useState(''); 
     const [selectedLocation, setSelectedLocation] = useState('');
@@ -49,6 +49,7 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
             const data = await response.json();
             alert(`Card Created: ${data.cardName}\nTitle: ${cardTitle}\nSaved at: ${data.filePath}`);
             setNewCardData(data.message);
+            onRefresh()
         } catch (error) {
             console.error('Error creating new card:', error);
             alert('Failed to create new card.');

@@ -12,6 +12,14 @@ from CardEntryManager.cardEntryManager import CardEntryManager
 
 # Create 'main' app obj
 app = Flask(__name__)
+
+EXPECTED_COLUMNS = [
+    "name", "alias", "dob", "ssn", "race", "gender", "driver license #",
+    "passport#", "weight", "height", "hair color", "eye color"
+]
+
+csv_file_path = os.path.join(os.path.dirname(__file__), "test.csv")
+
 # Enable Flask debug mode
 app.config['DEBUG'] = True
 CORS(app)
@@ -123,42 +131,34 @@ def upload_csv():
         
         print(f"DEBUG: Recieved file- {file.filename}")
 
-        # Define path for test.csv
-        csv_file_path = os.path.join(os.path.dirname(__file__), "test.csv")
-
         # Read existing CSV or create an empty DataFrame if not present
-        if os.path.exists(csv_file_path):
+        file_exists = os.path.exists(csv_file_path)
+        if file_exists:
             existing_data = pd.read_csv(csv_file_path, dtype=str)
         else:
-            existing_data = pd.DataFrame()
+            existing_data = pd.DataFrame(columns=EXPECTED_COLUMNS)
 
         # Read uploaded CSV
         new_data = pd.read_csv(file, dtype=str)
 
-        existing_columns = [col.strip().lower() for col in existing_data.columns]
-        new_columns = [col.strip() for col in new_data.columns]
+         # Clean the data: Strip whitespace/tab from both columns and data
+        new_data.columns = [col.strip().lower() for col in new_data.columns]
 
-        print("DEBUG: Existing columns:", existing_columns)
-        print("DEBUG: Uploaded columns:", new_columns)
+        new_data = new_data[[col for col in EXPECTED_COLUMNS if col in new_data.columns]]
 
-        if set(existing_columns) != set(new_columns):
-            missing = set(existing_columns) - set(new_columns)
-            extra = set(new_columns) - set(existing_columns)
-            return jsonify({'error': 'Uploaded CSV does not match the required format', 
-                    'missing_columns': list(missing), 
-                    'extra_columns': list(extra)}), 400
+        missing_cols = [col for col in EXPECTED_COLUMNS if col not in new_data.columns]
+        if missing_cols:
+            return jsonify({'error': 'Uploaded CSV is missing required columns', 'missing_columns': missing_cols}), 400
+        
+        new_data = new_data[EXPECTED_COLUMNS]
 
         # Append new data
-        combined_data = pd.concat([existing_data, new_data], ignore_index=True)
-
-        combined_data = combined_data.map(lambda x: None if isinstance(x, float) and np.isnan(x) else x)
-
-        combined_data.to_csv(csv_file_path, index=False)  # Save back to test.csv
+        new_data.to_csv(csv_file_path, mode='a', index=False, header=not file_exists)  # Save back to test.csv
 
         # Return updated data
         return jsonify({
             'message': 'CSV uploaded successfully',
-            'updated_data': combined_data.to_dict(orient="records")
+            'updated_data': new_data.to_dict(orient="records")
         }), 200
 
     except Exception as e:

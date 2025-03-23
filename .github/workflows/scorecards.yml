@@ -1,0 +1,20 @@
+name: Scorecards Supply-chain Security
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 0 * * 0'
+
+jobs:
+  analysis:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Run Scorecard analysis
+        uses: ossf/scorecard-action@v2.1.1
+        with:
+          results_file: results.sarif
+          results_format: sarif

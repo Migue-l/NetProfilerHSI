@@ -38,15 +38,15 @@ CORS(app, resources={
 })
 
 # Keep your existing constants
-EXPECTED_COLUMNS = [
-    "name", "alias", "dob", "ssn", "race", "gender", "driver license #",
-    "passport#", "weight", "height", "hair color", "eye color"
-]
+#EXPECTED_COLUMNS = [
+   # "name", "alias", "dob", "ssn", "race", "gender", "driver license #",
+   # "passport#", "weight", "height", "hair color", "eye color"
+#]
 
-csv_file_path = os.path.join(os.path.dirname(__file__), "people_data.csv")  # Changed to people_data.csv
+#csv_file_path = os.path.join(os.path.dirname(__file__), "people_data.csv")  # Changed to people_data.csv
 
 # Rest of your existing configuration
-app.config['DEBUG'] = True
+#app.config['DEBUG'] = True
 card_manager = CardEntryManager()
 selected_directory = None
 
@@ -102,8 +102,17 @@ def newCard():
         location = data.get('location', None)
         created_at = data.get('createdAt', 'Unknown Time')
         title = data.get('title', "")
+        csv_data = data.get('csvData', None)  # New: Get CSV data
 
-        result = card_manager.create_card(card_name, location, created_at, title=title)
+        # Create card with CSV data if provided
+        result = card_manager.create_card(
+            card_name, 
+            location, 
+            created_at, 
+            title=title,
+            csv_data=csv_data  # Pass to card manager
+        )
+        
         if "error" in result:
             return jsonify(result), 400
 
@@ -188,6 +197,8 @@ def get_csv_data():
             return jsonify({"error": "No data available"}), 400
 
         df = pd.read_csv(csv_file_path, dtype=str)
+        df = df.drop_duplicates()  # Add this line to remove duplicates
+
 
         if "Name" not in df.columns:
             return jsonify({"error": "CSV file does not contain 'Name' column"}), 400
@@ -198,3 +209,6 @@ def get_csv_data():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, threaded=True)

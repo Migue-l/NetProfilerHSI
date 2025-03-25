@@ -265,7 +265,19 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         root.render(<CardPreview card={PrevWin.cardData} />);
       }
     }
-  };
+    };
+
+    const addCategory = () => {
+        if (newCategory.trim() && !categories.includes(newCategory)) {
+            setCategories([...categories, newCategory]);
+            setNewCategory("");
+            setIsAddingCategory(false);
+        }
+    };
+
+    const deleteCategory = (category) => {
+        setCategories(categories.filter(c => c !== category));
+    };
 
 
     return (
@@ -320,22 +332,25 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                     <div className="editor-container">
                         {activeCardIndex !== null && openCards[activeCardIndex] && (
                             <>
-                                {/* CSV Data Display - Only for imported CSV cards */}
-                                {openCards[activeCardIndex].details?.type === "CSV Import" && (
+                                {/* Enhanced CSV Data Display */}
+                                {openCards[activeCardIndex].details?.csvItem && (
                                     <div className="csv-data-display">
-                                        <h3>CSV Import Data</h3>
-                                        <table>
-                                            <tbody>
-                                                {Object.entries(openCards[activeCardIndex].details)
-                                                    .filter(([key]) => key !== 'type')
-                                                    .map(([key, value]) => (
-                                                        <tr key={key}>
-                                                            <td><strong>{key}:</strong></td>
-                                                            <td>{value || <em>Not specified</em>}</td>
-                                                        </tr>
-                                                    ))}
-                                            </tbody>
-                                        </table>
+                                        <h3>CSV Data</h3>
+                                        <div className="csv-data-content">
+                                            <div className="csv-data-row">
+                                                <span className="csv-data-label">Original Value:</span>
+                                                <span className="csv-data-value">{openCards[activeCardIndex].details.csvItem}</span>
+                                            </div>
+                                            {openCards[activeCardIndex].details?.filePath && (
+                                                <div className="csv-data-row">
+                                                    <span className="csv-data-label">Stored At:</span>
+                                                    <span className="csv-data-value">
+                                                        {openCards[activeCardIndex].details.filePath}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {/* Add more CSV-related data as needed */}
+                                        </div>
                                     </div>
                                 )}
 
@@ -409,7 +424,11 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                                             <input
                                                                 type="text"
                                                                 value={currentValue}
-                                                                onChange={e => handleSubcatChange(openCards[activeCardIndex].selectedCategory, subcat, e.target.value)}
+                                                                onChange={e => handleSubcatChange(
+                                                                    openCards[activeCardIndex].selectedCategory,
+                                                                    subcat,
+                                                                    e.target.value
+                                                                )}
                                                                 style={{ marginLeft: '8px' }}
                                                             />
                                                         </label>

@@ -6,16 +6,23 @@ import DeckOfCards from '../assets/icons/DeckofCards.png';
 import CSVicon from '../assets/icons/CSVicon.png';
 import PDFicon from '../assets/icons/PDFicon.png';
 
-const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, availableDecks, onRefresh }) => {
+const Sidebar = ({
+    activeTab,
+    newCardData,
+    setNewCardData,
+    selectedDirectory,
+    availableDecks,
+    onRefresh,
+    onCsvSelect  // Add this
+}) => {
     const [cardName, setCardName] = useState('');
     const [cardTitle, setCardTitle] = useState('');
     const [selectedLocation, setSelectedLocation] = useState('');
     const [csvEntries, setCsvEntries] = useState([]);
     const fileInputRef = useRef(null);
-  const [selectedFile, setSelectedFile] = useState('');
+  //const [selectedFile, setSelectedFile] = useState('');
     const [scrollBoxData, setScrollBoxData] = useState([]);
     const [selectedCsvItem, setSelectedCsvItem] = useState(null);
-    const fileInputRef = useRef(null);
     const [selectedFile, setSelectedFile] = useState(null);
 
   // Reset location when directory changes
@@ -81,9 +88,7 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
         if (fileInputRef.current) fileInputRef.current.click();
     };
 
-  const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
-  };
+
 
   // Upload the selected file
   const handleFileUpload = async (event) => {

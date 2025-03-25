@@ -67,26 +67,40 @@ class CardEntryManager:
                 decks.extend(self.list_decks(item_path))
         return decks
 
-    def create_card(self, card_name, location, created_at, title="", subcategories=None):
-        """Creates a new card with optional subcategories"""
+    def create_card(self, card_name, location, created_at, title="", subcategories=None, csv_data=None):
+        """Creates a new card with optional subcategories and CSV data"""
         if not self.selected_directory:
-            return {"error": "No directory selected"}
+           return {"error": "No directory selected"}
 
         save_path = os.path.join(self.selected_directory, location) if location else self.selected_directory
         os.makedirs(save_path, exist_ok=True)
-        
+    
         file_path = os.path.join(save_path, f"{card_name}.csv")
+    
+    # Prepare rows including CSV data if provided
         rows = self._prepare_card_rows(card_name, created_at, title, subcategories)
-        
+    
+    # Add CSV data if provided
+        if csv_data:
+            rows.append({
+            "Card Name": card_name,
+            "Created At": created_at,
+            "Title": title,
+            "Category": "CSV Data",
+            "Subcategory": "Original Value",
+            "Value": csv_data
+            })
+    
         self._write_card_file(file_path, rows)
-        
+     
         return {
-            "message": "Card created successfully",
-            "cardName": card_name,
-            "filePath": file_path,
-            "data": self._flatten_rows(rows),
-            "subcategories": subcategories or {}
-        }
+         "message": "Card created successfully",
+        "cardName": card_name,
+        "filePath": file_path,
+        "data": self._flatten_rows(rows),
+        "subcategories": subcategories or {},
+        "csvData": csv_data
+       }
 
     def _prepare_card_rows(self, card_name, created_at, title, subcategories):
         """Prepares rows for card CSV"""

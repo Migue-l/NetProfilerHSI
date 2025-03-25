@@ -130,38 +130,42 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 3px 3px 0px #033f64;
+  box-shadow: 4px 6px 0px #c9c9c9;
   transition:
     box-shadow 0.3s ease,
     transform 0.2s ease,
     background-color 0.3s ease,
     border-left 0.3s ease;
-  margin-top: 17px;
+  margin-top: 10px;
   border-radius: 10px 10px 0px 0px;
-  background-color: #04548b;
-  padding: 8px 22px;
-  color: #ececec;
+  background-color: #e2e2e2;
+  color: #333333;
+  border: 1px solid #d6d6d6;
+  padding: 8px;
+  padding-left: 15px;
+  padding-right: 10px;
+  gap: 60px;
+
   font-weight: bold;
-  border-left: 2px solid #0d669e;
+  border-left: 2px solid #d8d8d8;
 
   cursor: pointer;
   border-bottom: 3px solid transparent;
   font-size: 17px;
-  padding-right: 100px;
   z-index: 0;
   position: relative;
   transform: translateY(1px);
+  min-width: 15%;
+  max-width: 35%;
 }
 
 .editor-card-tab.active {
   box-shadow: 4px 6px 0px #c9c9c9;
   margin-top: 5px;
-  padding: 8px 22px;
   background:  rgb(250, 250, 250);
   border-left: 2px solid #ffffff;
   font-weight: bold;
   color: #000000;
-  padding-right: 100px;
   font-size: 17px;
   z-index: 1;
   position: relative;
@@ -180,7 +184,7 @@
 
 /* Folder Tab Inactive Hover */
 .editor-card-tab:hover {
-  background-color: #047bb3;
+  background-color: #acacac;
   transform: scale(1, 1.06);
   transition:
     transform 0.2s ease,
@@ -188,6 +192,7 @@
     color 0.3s ease,
     background-color 0.3s ease,
     box-shadow 0.3s ease;
+    color: black;
 }
 
 .editor-card-tab:hover:active {
@@ -204,7 +209,6 @@
 
 .categories-container {
   width: 25%;
-  z-index: 1;
   background:  rgb(250, 250, 250);
   padding: 20px;
   border-bottom-left-radius: 8px;
@@ -224,12 +228,11 @@
 }
 
 .categories-list {
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .category-item {
   display: flex;
-  gap: 5px;
 }
 
 /* Individual Category Buttons to Open in Sub-Category Panel */
@@ -239,6 +242,44 @@
   margin-top: 10px;
   gap: 30px;
   min-width: 86%;
+  padding: 11px;
+  font-size: 16px;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;;
+  color: #474747;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px 0px 0px 8px;
+
+  transition:
+      box-shadow 0.3s ease,
+      transform 0.2s ease,
+      background-color 0.3s ease;
+  font-weight: bold;
+}
+
+.category-button:hover {
+  background-color: #04548b;
+  color: white;
+}
+
+.category-button:active {
+  transform: translateY(0.1px);
+}
+
+/* Add Category Name */
+.add-category {
+  margin-top: 20px;
+  display: flex;
+  gap: 5px;
+}
+
+.new-category-button{
+  display: column;
+  cursor: pointer;
+  margin-top: 20px;
+  gap: 30px;
+  min-width: 100%;
   padding: 11px;
   font-size: 16px;
   align-items: center;
@@ -253,63 +294,92 @@
       transform 0.2s ease,
       background-color 0.3s ease;
   font-weight: bold;
+  margin-bottom: 20px;
 }
 
-.category-button:hover {
+.new-category-button:hover {
   box-shadow: 0 6px 0px #045b91;
   transform: translateY(-2px);
   background-color: #047bb3;
 }
 
-.category-button:active {
+.new-category-button:active {
   transform: translateY(0.1px);
 }
 
-/* Add Category Name */
-.add-category {
-  margin-top: 20px;
-  display: flex;
-  gap: 5px;
-}
-
-.add-category input {
+/* Input field for category name */
+.input-category-name{
   flex: 1;
-  padding: 11px;
+  padding: 14px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
-.add-category input:focus {
+.input-category-name:focus {
   border-color: #04548b;
   outline: none;
 }
 
-/* Add Category + Button */
-.add-category button {
-  width: 40px;
-  background-color: #04548b;
-  color: #ffffff;
-  border: 1px transparent;
-  border-radius: 8px;
+/* Add Category "Add" Button */
+.add-category-button {
+  display: column;
   cursor: pointer;
-  box-shadow: 0 3px 0px #033f64;
+  gap: 30px;
+  width: 26%;
+  padding: 3px;
+  font-size: 16px;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;;
+  color: #474747;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  margin-bottom: 20px;
   transition:
-    box-shadow 0.3s ease,
-    transform 0.2s ease,
-    background-color 0.3s ease;
-  font-size: 15px;
+      box-shadow 0.3s ease,
+      transform 0.2s ease,
+      background-color 0.3s ease;
   font-weight: bold;
-  margin-bottom: 10px;
 }
 
-.add-category button:hover {
-  box-shadow: 0 7px 0px #045385;
-  transform: translateY(-2px);
-  background-color: #047bb3;
+.add-category-button:hover {
+  background-color: #045385;
+  color: white;
 }
 
-.add-category button:active {
+.add-category-button:active {
+  transform: translateY(0.1px);
+}
+
+/* Canceling Category "Cancel" Button */
+.dont-add-category-button {
+  display: row;
+  cursor: pointer;
+  margin-bottom: 20px;
+  gap: 30px;
+  width: 85%;
+  padding: 9px;
+  font-size: 16px;
+  align-items: center;
+  justify-content: center;
+  background-color: #e2e2e2;
+  color: #333333;
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+  transition:
+      box-shadow 0.3s ease,
+      transform 0.2s ease,
+      background-color 0.3s ease;
+  font-weight: bold;
+}
+
+.dont-add-category-button:hover {
+  background-color: #992f2f;
+  color: white;
+}
+
+.dont-add-category-button:active {
   transform: translateY(0.1px);
 }
 
@@ -370,11 +440,10 @@
   font-size: 16px;
   align-items: center;
   justify-content: center;
-  background-color: #992f2f;
-  color: #ffffff;
-  border: 1px transparent;
-  border-radius: 8px;
-  box-shadow: 0 3px 0px #680909;
+  background-color: #e2e2e2;
+  color: #333333;
+  border: 1px solid #d6d6d6;
+  border-radius: 0px 8px 8px 0px;
   transition:
       box-shadow 0.3s ease,
       transform 0.2s ease,
@@ -383,11 +452,77 @@
 }
 
 .delete-button:hover {
-  box-shadow: 0 6px 0px #940404;
-  transform: translateY(-2px);
-  background-color: #bd2727;
+  background-color: #992f2f;
+  color: white;
 }
 
 .delete-button:active {
+  transform: translateY(0.1px);
+}
+
+.close-tab-button {
+  cursor: pointer;
+  margin-top: 5px;
+  gap: 20px;
+  width: 50%;
+  padding: 5px;
+  padding-right: 8px;
+  padding-left: 8px;
+  max-width: 23px;
+  font-size: 10px;
+  align-items: right;
+  background-color: #992f2f;
+  color: #ffffff;
+  border: 1px transparent;
+  border-radius: 4px;
+  box-shadow: 0 2px 0px #680909;
+  transition:
+      box-shadow 0.3s ease,
+      transform 0.2s ease,
+      background-color 0.3s ease;
+  font-weight: bold;
+
+  margin-left: auto;
+}
+
+.close-tab-button:hover {
+  box-shadow: 0 4px 0px #940404;
+  transform: translateY(-1px);
+  background-color: #bd2727;
+}
+
+.close-tab-button:active {
+  transform: translateY(0.1px);
+}
+
+.save-button {
+  display: column;
+  cursor: pointer;
+  margin-top: 10px;
+  gap: 30px;
+  min-width: 10%;
+  padding: 11px;
+  font-size: 16px;
+  align-items: center;
+  justify-content: center;
+  background-color: #04548b;
+  color: #ffffff;
+  border: 1px transparent;
+  border-radius: 8px;
+  box-shadow: 0 3px 0px #033f64;
+  transition:
+      box-shadow 0.3s ease,
+      transform 0.2s ease,
+      background-color 0.3s ease;
+  font-weight: bold;
+}
+
+.save-button:hover {
+  box-shadow: 0 6px 0px #045b91;
+  transform: translateY(-2px);
+  background-color: #047bb3;
+}
+
+.save-button:active {
   transform: translateY(0.1px);
 }

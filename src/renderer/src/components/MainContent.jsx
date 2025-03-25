@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import CardPreview from "./CardPreview.jsx";
 import useServerResponse from '../../../hooks/useServerResponse';
 
+
 const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, setActiveTab, refreshKey }) => {
     const [csvData, setCsvData] = useServerResponse('Waiting for csv data...');
     const [selectedDirectory, setLocalSelectedDirectory] = useState('');
@@ -57,6 +58,24 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
             .join('\n');
         return `${header}\n${separator}\n${rows}`;
     };
+
+    const addCategory = () => {
+        // Limit input string to 20 characters
+        const trimmedInput = newCategory.trim().substring(0, 20);
+        // Only allow alphanumeric names and "-" "_" " " to seperate multi-word names 
+        const validFormat = /^[a-zA-Z0-9-_\s]+$/.test(trimmedInput);
+        if (validFormat) {
+          setCategories([...categories, trimmedInput]);
+          setNewCategory("");
+          setIsAddingCategory(false);
+        } else {
+          /////// alert("Invalid category name. Only letters, numbers, '-', and '_' are allowed."); 
+        }
+      };
+    
+      const deleteCategory = (categoryToDelete) => {
+        setCategories(categories.filter(category => category !== categoryToDelete));
+      };
 
     const selectRootDirectory = async () => {
         try {
@@ -229,11 +248,13 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
             }
 
             const result = await response.json();
-            alert(`Subcategory data saved for ${currentCard.name}: ` + JSON.stringify(result.updatedData));
+            /////// alert(`Subcategory data saved for ${currentCard.name}: ` + JSON.stringify(result.updatedData));
 
         } catch (error) {
             console.error("Error saving subcategory data:", error);
-            alert("Error saving subcategory data: " + error.message);
+
+            
+            /////// alert("Error saving subcategory data: " + error.message);
         }
     };
 
@@ -306,7 +327,7 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                 }}
                             >
                                 {card.details.title || card.name}
-                                <button onClick={(e) => closeTab(index, e)}>x</button>
+                                <button className="close-tab-button" onClick={(e) => closeTab(index, e)}>x</button>
                             </div>
                         ))}
                     </header>
@@ -316,21 +337,22 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                         {activeCardIndex !== null && openCards[activeCardIndex] ? (
                             <>
                                 <div className="categories-container">
-                                    <div className="add-category">
+                                    <div className="add-category-container">
                                         {isAddingCategory ? (
                                             <div className="add-category">
                                                 <input
+                                                    className="input-category-name"
                                                     type="text"
-                                                    placeholder="Enter category name"
+                                                    placeholder="Enter Category Name"
                                                     value={newCategory}
                                                     onChange={(e) => setNewCategory(e.target.value)}
                                                     maxLength={20}
                                                 />
-                                                <button onClick={addCategory}>OK</button>
-                                                <button onClick={() => setIsAddingCategory(false)}>Cancel</button>
+                                                <button className="add-category-button" onClick={addCategory}>Add</button>
+                                                <button className="dont-add-category-button" onClick={() => setIsAddingCategory(false)}>Close</button>
                                             </div>
                                         ) : (
-                                            <button onClick={() => setIsAddingCategory(true)}>New Category</button>
+                                            <button className="new-category-button" onClick={() => setIsAddingCategory(true)}>New Category</button>
                                         )}
                                     </div>
                                     <div className="categories-list">
@@ -379,10 +401,10 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                             {categorySubcategories[openCards[activeCardIndex].selectedCategory]?.map(subcat => {
                                                 const currentValue = openCards[activeCardIndex].subcatValues?.[openCards[activeCardIndex].selectedCategory]?.[subcat] || "";
                                                 return (
-                                                    <div key={subcat} style={{ marginBottom: '8px' }}>
+                                                    <div key={subcat} style={{ marginBottom: '8px' }}> 
                                                         <label>
                                                             {subcat}:
-                                                            <input
+                                                            <input 
                                                                 type="text"
                                                                 value={currentValue}
                                                                 onChange={e => handleSubcatChange(openCards[activeCardIndex].selectedCategory, subcat, e.target.value)}
@@ -392,7 +414,7 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                                     </div>
                                                 );
                                             })}
-                                            <button onClick={handleSaveSubcatData}>Save</button>
+                                            <button className="save-button" onClick={handleSaveSubcatData}>Save</button>
                                         </>
                                     ) : (
                                         <p>Please select a category to edit subcategories.</p>

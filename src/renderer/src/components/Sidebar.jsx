@@ -24,7 +24,7 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
     const fetchNewCardData = async () => {
         // Validate that a title has been entered.
         if (!cardTitle.trim()) {
-            alert("Card title is required.");
+            /////// alert("Card title is required.");
             return;
         }
         const uniqueCardName = `Net-Card-${new Date()
@@ -47,12 +47,12 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
                 throw new Error(`Failed to create card: ${errorText}`);
             }
             const data = await response.json();
-            alert(`Card Created: ${data.cardName}\nTitle: ${cardTitle}\nSaved at: ${data.filePath}`);
+            /////// alert(`Card Created: ${data.cardName}\nTitle: ${cardTitle}\nSaved at: ${data.filePath}`);
             setNewCardData(data.message);
             onRefresh()
         } catch (error) {
             console.error('Error creating new card:', error);
-            alert('Failed to create new card.');
+            /////// alert('Failed to create new card.');
         }
     };
 
@@ -72,11 +72,11 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
                 throw new Error(`Failed to create deck: ${errorText}`);
             }
             const data = await response.json();
-            alert(`Deck Created: ${data.deckName}\nSaved at: ${data.filePath}`);
+            /////// alert(`Deck Created: ${data.deckName}\nSaved at: ${data.filePath}`);
             setNewCardData(data.message);
         } catch (error) {
             console.error('Error creating new deck:', error);
-            alert('Failed to create new deck.');
+            /////// alert('Failed to create new deck.');
         }
     };
 
@@ -94,7 +94,7 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
     const file = event.target.files[0]; // Get the file directly from the event
 
     if (!file) {
-      alert("Please select a file first!");
+      /////// alert("Please select a file first!");
       return;
     }
 
@@ -112,11 +112,11 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
       const result = await response.json();
       if (response.ok) {
         console.log("File uploaded successfully:", result); // log successful result
-        alert("File uploaded successfully!");
+        /////// alert("File uploaded successfully!");
         await fetchCsvData(); // Refresh the scrollable box
       } else {
         console.error("Error response from backend:", result);
-        alert(result.error);
+        /////// alert(result.error);
       }
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -166,7 +166,7 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
                    
                     <input
                         type="text"
-                        className="card-title-input"
+                        className="search-bar"
                         placeholder="Enter Card Title"
                         value={cardTitle}
                         onChange={(e) => setCardTitle(e.target.value)}

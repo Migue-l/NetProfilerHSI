@@ -8,13 +8,15 @@ import PDFicon from '../assets/icons/PDFicon.png';
 
 const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, availableDecks, onRefresh }) => {
     const [cardName, setCardName] = useState('');
-    const [cardTitle, setCardTitle] = useState(''); 
+    const [cardTitle, setCardTitle] = useState('');
     const [selectedLocation, setSelectedLocation] = useState('');
     const [csvEntries, setCsvEntries] = useState([]);
     const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState('');
     const [scrollBoxData, setScrollBoxData] = useState([]);
     const [selectedCsvItem, setSelectedCsvItem] = useState(null);
+    const fileInputRef = useRef(null);
+    const [selectedFile, setSelectedFile] = useState(null);
 
   // Reset location when directory changes
   useEffect(() => {
@@ -22,22 +24,18 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
   }, [selectedDirectory]);
 
     const fetchNewCardData = async () => {
-        // Validate that a title has been entered.
         if (!cardTitle.trim()) {
             alert("Card title is required.");
             return;
         }
-        const uniqueCardName = `Net-Card-${new Date()
-            .toISOString()
-            .slice(0, 19)
-            .replace(/[:T]/g, "-")}`;
+        const uniqueCardName = `Net-Card-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}`;
         try {
             const response = await fetch('http://127.0.0.1:5000/api/new-card', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     cardName: uniqueCardName,
-                    title: cardTitle, // Pass title to aPI
+                    title: cardTitle,
                     location: selectedLocation || "",
                     createdAt: new Date().toISOString()
                 }),
@@ -57,15 +55,14 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
     };
 
     const fetchNewDeckData = async () => {
-        const uniqueDeckName = `Net-Deck-${new Date()
-            .toISOString()
-            .slice(0, 19)
-            .replace(/[:T]/g, "-")}`;
         try {
             const response = await fetch('http://127.0.0.1:5000/api/new-deck', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ deckName: uniqueDeckName, location: selectedLocation || "" }),
+                body: JSON.stringify({
+                    deckName: `New-Deck-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}`,
+                    location: selectedLocation || ""
+                }),
             });
             if (!response.ok) {
                 const errorText = await response.text();
@@ -73,7 +70,7 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
             }
             const data = await response.json();
             alert(`Deck Created: ${data.deckName}\nSaved at: ${data.filePath}`);
-            setNewCardData(data.message);
+            onRefresh();
         } catch (error) {
             console.error('Error creating new deck:', error);
             alert('Failed to create new deck.');
@@ -163,7 +160,6 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
                         value={cardName}
                         onChange={(e) => setCardName(e.target.value)}
                     />
-                   
                     <input
                         type="text"
                         className="card-title-input"
@@ -208,19 +204,11 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
                     <div className="scrollable-box">
                         <h3>CSV Entries:</h3>
                         <div className="csv-list">
-                            {scrollBoxData.length > 0 ? (
-                                scrollBoxData.map((name, index) => (
-                                    <div
-                                        key={index}
-                                        className={`csv-item ${selectedCsvItem === name ? 'selected' : ''}`}
-                                        onClick={() => handleCsvItemClick(name)}
-                                    >
-                                        {name}
-                                    </div>
-                                ))
-                            ) : (
-                                <p>No data available</p>
-                            )}
+                            {scrollBoxData.map((name, index) => (
+                                <div key={index} className={`csv-item ${selectedCsvItem === name ? 'selected' : ''}`} onClick={() => handleCsvItemClick(name)}>
+                                    {name}
+                                </div>
+                            ))}
                         </div>
                     </div>
                     <input
@@ -232,11 +220,6 @@ const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, av
                     />
                 </div>
             )}
-            {activeTab === 'Settings' && <div className="settings-sidebar"></div>}
-            <div className="logo-container">
-                <img alt="hsi logo" className="logo" src={HSI_logo} />
-                <img alt="fgcu logo" className="logo" src={FGCU_logo} />
-            </div>
         </div>
     );
 };

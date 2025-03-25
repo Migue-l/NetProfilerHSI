@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from "react-dom/client";
+import CardPreview from "./CardPreview.jsx";
 import useServerResponse from '../../../hooks/useServerResponse';
 
 const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, setActiveTab, refreshKey }) => {
@@ -27,6 +29,11 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         Affiliation: ["Social Media", "Associated Business"],
         Criminal: ["Suspected Role", "FBI #", "Active Warrants", "Criminal History", "SAR Activity", "Date SAR Checked", "Case #", "ROA #"]
     };
+
+    useEffect(() => {
+        console.log("Current activeCardIndex:", activeCardIndex);
+        console.log("Current openCards:", openCards);
+    }, [activeCardIndex, openCards]);
 
     const fetchCsvContent = async () => {
         try {
@@ -235,28 +242,31 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         }
     };
 
-    const handlePreviewClick = () => {
-        if (activeCardIndex !== null && openCards[activeCardIndex]) {
-            const card = openCards[activeCardIndex];
-            const previewWindow = window.open('blank', '_blank');
-            if (previewWindow) {
-                previewWindow.document.write(`
-          <html>
-            <head>
-              <title>Preview Card</title>
-            </head>
-            <body>
-              <h1>Preview Card: ${card.name}</h1>
-              <p><b>Details:</b> ${card.details}</p>
-              <p><b>CSV Content:</b></p>
-              <pre>${csvData}</pre>
-            </body>
-          </html>
-        `);
-                previewWindow.document.close();
-            }
-        }
-    };
+    // preview card opening
+  const handlePreviewClick = () => {
+    if (openCards[activeCardIndex]) {
+      const card = openCards[activeCardIndex];
+      const PrevWin = window.open("", "_blank", "width=1920,height=1080");
+
+      if (PrevWin) {
+        PrevWin.cardData = card;
+
+        const link = PrevWin.document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "/src/assets/css/cardpreview.css";
+        PrevWin.document.head.appendChild(link);
+
+        PrevWin.document.body.innerHTML = "<div id='new-root'></div>";
+        const root = ReactDOM.createRoot(
+          PrevWin.document.getElementById("new-root")
+        );
+
+        // render component
+        root.render(<CardPreview card={PrevWin.cardData} />);
+      }
+    }
+  };
+
 
     return (
         <div className="main-content">
@@ -308,8 +318,28 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
 
                     {/* Editor Body */}
                     <div className="editor-container">
-                        {activeCardIndex !== null && openCards[activeCardIndex] ? (
+                        {activeCardIndex !== null && openCards[activeCardIndex] && (
                             <>
+                                {/* CSV Data Display - Only for imported CSV cards */}
+                                {openCards[activeCardIndex].details?.type === "CSV Import" && (
+                                    <div className="csv-data-display">
+                                        <h3>CSV Import Data</h3>
+                                        <table>
+                                            <tbody>
+                                                {Object.entries(openCards[activeCardIndex].details)
+                                                    .filter(([key]) => key !== 'type')
+                                                    .map(([key, value]) => (
+                                                        <tr key={key}>
+                                                            <td><strong>{key}:</strong></td>
+                                                            <td>{value || <em>Not specified</em>}</td>
+                                                        </tr>
+                                                    ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+
+                                {/* Regular Editor Content */}
                                 <div className="categories-container">
                                     <div className="add-category">
                                         {isAddingCategory ? (
@@ -356,7 +386,6 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                                             }
                                                             return updatedCards;
                                                         });
-                                                        
                                                         deleteCategory(category);
                                                     }}
                                                 >
@@ -367,6 +396,7 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                     </div>
                                 </div>
                                 <div className="category-editing-panel">
+                                    <button className="preview-button" onClick={handlePreviewClick}>Preview Card</button>
                                     {openCards[activeCardIndex].selectedCategory ? (
                                         <>
                                             <h2>Editing {openCards[activeCardIndex].selectedCategory}</h2>
@@ -387,16 +417,13 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                                 );
                                             })}
                                             <button onClick={handleSaveSubcatData}>Save</button>
-                                            <button className="preview-button" onClick={handlePreviewClick}>
-                                                Preview Card
-                                            </button>
                                         </>
                                     ) : (
                                         <p>Please select a category to edit subcategories.</p>
                                     )}
                                 </div>
                             </>
-                        ) : null}
+                        )}
                     </div>
                 </>
             )}

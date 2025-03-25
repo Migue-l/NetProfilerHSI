@@ -9,11 +9,16 @@ from flask_cors import CORS
 import pandas as pd
 from CardEntryManager.cardEntryManager import CardEntryManager
 
+from flask_cors import CORS
+
 app = Flask(__name__)
 
 EXPECTED_COLUMNS = [
     "name", "alias", "dob", "ssn", "race", "gender", "driver license #",
-    "passport#", "weight", "height", "hair color", "eye color"
+    "passport coc", "weight", "height", "hair color", "eye color", "last known residence", 
+    "cob", "employment", "phone #", "email address", "date sar checked", "immigration status",
+    "sid #", "travel", "make", "model", "vehicle tag #", "color", "social media", "associated business", 
+    "suspected role", "fbi #", "active warrants", "criminal history", "sar activity", "case #", "roa #"
 ]
 
 csv_file_path = os.path.join(os.path.dirname(__file__), "test.csv")
@@ -22,9 +27,28 @@ csv_file_path = os.path.join(os.path.dirname(__file__), "test.csv")
 app.config['DEBUG'] = True
 CORS(app)
 
+# Configure CORS more specifically
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:5173"],  # Your Vite frontend
+        "methods": ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+        "allow_headers": ["Content-Type"],
+        "supports_credentials": True
+    }
+})
 
+# Keep your existing constants
+EXPECTED_COLUMNS = [
+    "name", "alias", "dob", "ssn", "race", "gender", "driver license #",
+    "passport#", "weight", "height", "hair color", "eye color"
+]
+
+csv_file_path = os.path.join(os.path.dirname(__file__), "people_data.csv")  # Changed to people_data.csv
+
+# Rest of your existing configuration
+app.config['DEBUG'] = True
 card_manager = CardEntryManager()
-selected_directory = None  # Global variable for selected root directory
+selected_directory = None
 
 def select_directory_dialog(result_container):
     global card_manager, selected_directory
@@ -130,6 +154,9 @@ def upload_csv():
          # Clean the data: Strip whitespace/tab from both columns and data
         new_data.columns = [col.strip().lower() for col in new_data.columns]
 
+        new_data = new_data.reindex(columns=EXPECTED_COLUMNS)  # Reorder columns
+        new_data = new_data.fillna("N/A")  # Fill missing values
+
         new_data = new_data[[col for col in EXPECTED_COLUMNS if col in new_data.columns]]
 
         missing_cols = [col for col in EXPECTED_COLUMNS if col not in new_data.columns]
@@ -147,7 +174,7 @@ def upload_csv():
         # Return updated data
         return jsonify({
             'message': 'CSV uploaded successfully',
-            'updated_data': new_data.to_dict(orient="records")
+            'updated_data': new_data.fillna("").to_dict(orient="records")
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -171,7 +198,3 @@ def get_csv_data():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
-if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000, debug=True)

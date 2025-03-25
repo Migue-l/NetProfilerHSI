@@ -6,125 +6,22 @@ import DeckOfCards from '../assets/icons/DeckofCards.png';
 import CSVicon from '../assets/icons/CSVicon.png';
 import PDFicon from '../assets/icons/PDFicon.png';
 
-const Sidebar = ({
-    activeTab,
-    newCardData,
-    setNewCardData,
-    selectedDirectory,
-    availableDecks,
-    onRefresh,
-    setOpenCards,
-    setActiveCardIndex,  // Add this line
-    setActiveTab,
-}) => {
+const Sidebar = ({ activeTab, newCardData, setNewCardData, selectedDirectory, availableDecks, onRefresh }) => {
     const [cardName, setCardName] = useState('');
     const [cardTitle, setCardTitle] = useState('');
     const [selectedLocation, setSelectedLocation] = useState('');
+    const [csvEntries, setCsvEntries] = useState([]);
+    const fileInputRef = useRef(null);
+  const [selectedFile, setSelectedFile] = useState('');
     const [scrollBoxData, setScrollBoxData] = useState([]);
     const [selectedCsvItem, setSelectedCsvItem] = useState(null);
     const fileInputRef = useRef(null);
     const [selectedFile, setSelectedFile] = useState(null);
 
-    // Reset location when directory changes
-    useEffect(() => {
-        setSelectedLocation('');
-    }, [selectedDirectory]);
-
-    const fetchCsvData = async () => {
-        try {
-            const response = await fetch("http://127.0.0.1:5000/api/get-csv-data");
-            const result = await response.json();
-            if (response.ok) {
-                console.log("Fetched CSV Data:", result.names);
-                setScrollBoxData(result.names || []);
-            } else {
-                console.error("Error fetching CSV data:", result.error);
-            }
-        } catch (error) {
-            console.error("Error fetching CSV data:", error);
-        }
-    };
-
-    useEffect(() => {
-        fetchCsvData();
-    }, []);
-
-    const handleCsvItemClick = async (item) => {
-        console.log("Creating card for:", item);
-
-        try {
-            const response = await fetch('http://127.0.0.1:5000/api/create-card-from-csv', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name: item })
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || "Failed to create card");
-            }
-
-            const result = await response.json();
-
-            // Add to open cards and refresh
-            setOpenCards(prev => [...prev, {
-                name: result.cardName,
-                details: {
-                    title: item,
-                    type: "CSV Card",
-                    ...result.data
-                },
-                selectedCategory: "Personal",
-                subcatValues: result.subcategories
-            }]);
-
-            setActiveCardIndex(openCards.length);
-            setActiveTab("Editor");
-            onRefresh();
-
-        } catch (error) {
-            console.error("Error creating card:", error);
-            alert(`Error creating card: ${error.message}`);
-        }
-    };
-
-    const handleFileUpload = async (event) => {
-        const file = event.target.files[0];
-        if (!file) {
-            alert("Please select a file first!");
-            return;
-        }
-
-        setSelectedFile(file);
-
-        const formData = new FormData();
-        formData.append("file", file);
-
-        try {
-            const response = await fetch("http://127.0.0.1:5000/api/upload-csv", {
-                method: "POST",
-                body: formData,
-            });
-
-            const result = await response.json();
-            if (response.ok) {
-                console.log("File uploaded successfully:", result);
-                alert("File uploaded successfully!");
-                fetchCsvData();
-            } else {
-                console.error("Error response from backend:", result);
-                alert(result.error);
-            }
-        } catch (error) {
-            console.error("Error uploading file:", error);
-        }
-    };
-
-    const handleImportClick = () => {
-        fileInputRef.current?.click();
-    };
+  // Reset location when directory changes
+  useEffect(() => {
+    setSelectedLocation('');
+  }, [selectedDirectory]);
 
     const fetchNewCardData = async () => {
         if (!cardTitle.trim()) {
@@ -150,7 +47,7 @@ const Sidebar = ({
             const data = await response.json();
             alert(`Card Created: ${data.cardName}\nTitle: ${cardTitle}\nSaved at: ${data.filePath}`);
             setNewCardData(data.message);
-            onRefresh();
+            onRefresh()
         } catch (error) {
             console.error('Error creating new card:', error);
             alert('Failed to create new card.');
@@ -179,6 +76,78 @@ const Sidebar = ({
             alert('Failed to create new deck.');
         }
     };
+
+    const handleImportClick = () => {
+        if (fileInputRef.current) fileInputRef.current.click();
+    };
+
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
+  };
+
+  // Upload the selected file
+  const handleFileUpload = async (event) => {
+    
+    const file = event.target.files[0]; // Get the file directly from the event
+
+    if (!file) {
+      alert("Please select a file first!");
+      return;
+    }
+
+    setSelectedFile(file); // Update state (though it's not needed immediately here)
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("http://127.0.0.1:5000/api/upload-csv", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        console.log("File uploaded successfully:", result); // log successful result
+        alert("File uploaded successfully!");
+        await fetchCsvData(); // Refresh the scrollable box
+      } else {
+        console.error("Error response from backend:", result);
+        alert(result.error);
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+    }
+  };
+
+  // Fetch CSV data for scrollable box
+  const fetchCsvData = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:5000/api/get-csv-data");
+      const result = await response.json();
+      if (response.ok) {
+        console.log("Fetched CSV Data:", result.names)// Debugging log
+        setScrollBoxData(result.names || []); // Update state with new names
+        console.log("Updated State:", scrollBoxData); // check if state is updating
+      } else {
+        console.error("Error fetching CSV data:", result.error);
+      }
+    } catch (error) {
+      console.error("Error fetching CSV data:", error);
+    }
+  };
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchCsvData();
+  }, []);
+
+  const handleCsvItemClick = async (item) => {
+    console.log("CSV item clicked:", item);
+    setSelectedCsvItem(item); // Set the selected item to highlight
+    await fetchCsvData();
+    onCsvSelect(item);
+  };
 
     return (
         <div className="sidebar">

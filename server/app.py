@@ -9,13 +9,32 @@ from flask_cors import CORS
 import pandas as pd
 from CardEntryManager.cardEntryManager import CardEntryManager
 
+from flask_cors import CORS
+
 app = Flask(__name__)
+
+# Configure CORS more specifically
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:5173"],  # Your Vite frontend
+        "methods": ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+        "allow_headers": ["Content-Type"],
+        "supports_credentials": True
+    }
+})
+
+# Keep your existing constants
+EXPECTED_COLUMNS = [
+    "name", "alias", "dob", "ssn", "race", "gender", "driver license #",
+    "passport#", "weight", "height", "hair color", "eye color"
+]
+
+csv_file_path = os.path.join(os.path.dirname(__file__), "people_data.csv")  # Changed to people_data.csv
+
+# Rest of your existing configuration
 app.config['DEBUG'] = True
-CORS(app)
-
-
 card_manager = CardEntryManager()
-selected_directory = None  # Global variable for selected root directory
+selected_directory = None
 
 def select_directory_dialog(result_container):
     global card_manager, selected_directory
@@ -97,32 +116,47 @@ def newDeck():
 def upload_csv():
     try:
         if 'file' not in request.files:
+            print("DEBUG: No file found in request")
             return jsonify({'error': 'No file provided'}), 400
 
         file = request.files['file']
         if file.filename == '':
+            print("DEBUG: Empty filename")
             return jsonify({'error': 'No file selected'}), 400
+        
+        print(f"DEBUG: Received file- {file.filename}")
 
-        csv_file_path = os.path.join(os.path.dirname(__file__), "test.csv")
-        print("CSV file path:", csv_file_path)
-
-        if os.path.exists(csv_file_path):
+        # Read existing CSV or create an empty DataFrame if not present
+        file_exists = os.path.exists(csv_file_path)
+        if file_exists:
             existing_data = pd.read_csv(csv_file_path, dtype=str)
         else:
-            existing_data = pd.DataFrame()
+            existing_data = pd.DataFrame(columns=EXPECTED_COLUMNS)
 
+        # Read uploaded CSV
         new_data = pd.read_csv(file, dtype=str)
 
-        if not existing_data.empty and list(existing_data.columns) != list(new_data.columns):
-            return jsonify({'error': 'Uploaded CSV does not match the required format'}), 400
+        # Clean the data: Strip whitespace/tab from both columns and data
+        new_data.columns = [col.strip().lower() for col in new_data.columns]
 
-        combined_data = pd.concat([existing_data, new_data], ignore_index=True)
-        combined_data.to_csv(csv_file_path, index=False)
+        new_data = new_data[[col for col in EXPECTED_COLUMNS if col in new_data.columns]]
 
+        missing_cols = [col for col in EXPECTED_COLUMNS if col not in new_data.columns]
+        if missing_cols:
+            return jsonify({'error': 'Uploaded CSV is missing required columns', 'missing_columns': missing_cols}), 400
+        
+        new_data = new_data[EXPECTED_COLUMNS]
+
+        # Append new data
+        with open(csv_file_path, 'a', newline='') as f:
+            if file_exists:
+                f.write("\n")
+            new_data.to_csv(f, index=False, header=not file_exists, lineterminator="\n")
+
+        # Return updated data
         return jsonify({
             'message': 'CSV uploaded successfully',
-            'file_path': csv_file_path,
-            'updated_data': combined_data.to_dict(orient="records")
+            'updated_data': new_data.to_dict(orient="records")
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -137,32 +171,66 @@ def get_csv_data():
         df = pd.read_csv(csv_file_path, dtype=str)
 
         if "Name" not in df.columns:
-            return jsonify({"error": f"Expected 'Name' column but found: {df.columns.tolist()}"}), 400
+            return jsonify({"error": "CSV file does not contain 'Name' column"}), 400
 
-        return jsonify({"names": df["Name"].tolist()}), 200
+        names_list = df["Name"].dropna().tolist()
+
+        return jsonify({"names": names_list}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-@app.route('/api/update-card-subcat', methods=['POST'])
-def update_card_subcat():
-    try:
-        data = request.get_json()
-        cardName = data.get('cardName')
-        subcatData = data.get('subcatData')
-        
-        if not cardName:
-            return jsonify({"error": "cardName is required"}), 400
-        if not subcatData:
-            return jsonify({"error": "subcatData is required"}), 400
-
-        result = card_manager.update_card_subcategories(cardName, subcatData)
-        if "error" in result:
-            return jsonify(result), 400
-
-        return jsonify(result), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000, debug=True)
+
+@app.route('/api/get-csv-person', methods=['GET'])
+def get_csv_person():
+    name = request.args.get('name')
+    try:
+        df = pd.read_csv('people_data.csv')
+        person_data = df[df['Name'] == name].iloc[0].to_dict()
+        return jsonify(person_data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@app.route('/api/create-card-from-csv', methods=['POST'])
+def create_card_from_csv():
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        
+        if not name:
+            return jsonify({"error": "Name is required"}), 400
+        
+        # Read from people_data.csv
+        csv_path = os.path.join(os.path.dirname(__file__), "people_data.csv")
+        if not os.path.exists(csv_path):
+            return jsonify({"error": "CSV file not found"}), 404
+            
+        df = pd.read_csv(csv_path)
+        person_data = df[df['Name'].str.lower() == name.lower()].iloc[0].to_dict()
+        
+        # Create card
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        card_name = f"CSV-{name}-{timestamp}"
+        
+        result = card_manager.create_card(
+            card_name=card_name,
+            location=None,
+            created_at=datetime.now().isoformat(),
+            title=name,
+            subcategories={
+                "Personal": {
+                    "First Name": person_data.get("First Name", ""),
+                    "Last Name": person_data.get("Last Name", ""),
+                    "DOB": person_data.get("DOB", ""),
+                    # Add other fields as needed
+                }
+            }
+        )
+        
+        return jsonify(result), 201
+        
+    except IndexError:
+        return jsonify({"error": f"Person '{name}' not found in CSV"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

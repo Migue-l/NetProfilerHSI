@@ -391,3 +391,24 @@
 .delete-button:active {
   transform: translateY(0.1px);
 }
+
+.csv-data-display {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+
+.csv-data-display table {
+        width: 100%;
+        border-collapse: collapse;
+ }
+
+.csv-data-display td {
+        padding: 8px;
+        border-bottom: 1px solid #eee;
+ }
+
+.csv-data-display tr:last-child td {
+        border-bottom: none;
+ }

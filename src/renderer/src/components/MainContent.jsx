@@ -28,6 +28,11 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         Criminal: ["Suspected Role", "FBI #", "Active Warrants", "Criminal History", "SAR Activity", "Date SAR Checked", "Case #", "ROA #"]
     };
 
+    useEffect(() => {
+        console.log("Current activeCardIndex:", activeCardIndex);
+        console.log("Current openCards:", openCards);
+    }, [activeCardIndex, openCards]);
+
     const fetchCsvContent = async () => {
         try {
             const response = await fetch(`http://127.0.0.1:5000/api/get-csv-data`);
@@ -235,6 +240,7 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         }
     };
 
+
     const handlePreviewClick = () => {
         if (activeCardIndex !== null && openCards[activeCardIndex]) {
             const card = openCards[activeCardIndex];
@@ -308,8 +314,28 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
 
                     {/* Editor Body */}
                     <div className="editor-container">
-                        {activeCardIndex !== null && openCards[activeCardIndex] ? (
+                        {activeCardIndex !== null && openCards[activeCardIndex] && (
                             <>
+                                {/* CSV Data Display - Only for imported CSV cards */}
+                                {openCards[activeCardIndex].details?.type === "CSV Import" && (
+                                    <div className="csv-data-display">
+                                        <h3>CSV Import Data</h3>
+                                        <table>
+                                            <tbody>
+                                                {Object.entries(openCards[activeCardIndex].details)
+                                                    .filter(([key]) => key !== 'type')
+                                                    .map(([key, value]) => (
+                                                        <tr key={key}>
+                                                            <td><strong>{key}:</strong></td>
+                                                            <td>{value || <em>Not specified</em>}</td>
+                                                        </tr>
+                                                    ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+
+                                {/* Regular Editor Content */}
                                 <div className="categories-container">
                                     <div className="add-category">
                                         {isAddingCategory ? (
@@ -356,7 +382,6 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                                             }
                                                             return updatedCards;
                                                         });
-                                                        
                                                         deleteCategory(category);
                                                     }}
                                                 >
@@ -396,7 +421,7 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                     )}
                                 </div>
                             </>
-                        ) : null}
+                        )}
                     </div>
                 </>
             )}

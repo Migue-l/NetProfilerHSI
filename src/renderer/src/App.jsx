@@ -154,7 +154,7 @@ function App() {
         <PromptModal
           show={showModal}
           title="Create Card from CSV"
-          message="Enter a title for this CSV card:"
+          message="Enter a title for this card:"
           defaultValue={currentCsvItem || ""}
           onConfirm={handleModalConfirm}
           onCancel={() => setShowModal(false)}

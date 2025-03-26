@@ -359,7 +359,7 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                                 <input
                                                     className="input-category-name"
                                                     type="text"
-                                                    placeholder="Enter category name"
+                                                    placeholder="Enter Category Name"
                                                     value={newCategory}
                                                     onChange={(e) => setNewCategory(e.target.value)}
                                                     maxLength={20}

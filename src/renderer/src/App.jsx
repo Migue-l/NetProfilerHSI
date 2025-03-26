@@ -27,7 +27,7 @@ function App() {
 
   const categorizeSubcatValues = (flatValues) => {
     const categoryMap = {
-      Personal: ["dob", "ssn", "gender", "race", "alias", "cob", "height", "weight", "hair color", "eye color", "last known residence", "employment"],
+      Personal: ["dob", "ssn", "gender", "race", "alias", "cob", "height", "weight", "hair color", "eye color", "last known residence", "employment", "name"],
       Contact: ["phone #", "email address"],
       Immigration: ["immigration status", "passport coc", "sid #", "travel"],
       Vehicle: ["make", "model", "vehicle tag #", "color"],

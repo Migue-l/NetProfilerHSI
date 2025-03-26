@@ -20,7 +20,7 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
 
     //  subcategories for each category
     const categorySubcategories = {
-        Personal: ["First Name", "Last Name", "Alias", "DOB", "COB", "SSN", "Race", "Gender", "Height", "Weight", "Hair color", "Eye color", "Last Known Residence", "Employment"],
+        Personal: ["Name", "Alias", "DOB", "COB", "SSN", "Race", "Gender", "Height", "Weight", "Hair color", "Eye color", "Last Known Residence", "Employment"],
         Contact: ["Phone #", "Email Address"],
         Immigration: ["Passport COC", "Immigration Status", "SID #", "Travel"],
         Vehicle: ["Make", "Model", "Vehicle Tag #", "Color"],

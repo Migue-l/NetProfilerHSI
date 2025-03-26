@@ -15,11 +15,15 @@
   const TitleInput = React.memo(
     forwardRef((props, ref) => {
       const [localTitle, setLocalTitle] = useState('');
+      const [forceKey, setForceKey] = useState(Date.now());
       const inputRef = useRef(null);
   
       useImperativeHandle(ref, () => ({
         getTitle: () => localTitle,
-        clear: () => setLocalTitle(''),
+        clear: () => {
+          setLocalTitle('');
+          setForceKey(Date.now());
+        },
         focus: () => inputRef.current?.focus()
       }));
   
@@ -29,12 +33,14 @@
   
       return (
         <input
+          key={forceKey}
           ref={inputRef}
           type="text"
           className="card-title-input"
           placeholder="Enter Card Title"
           value={localTitle}
           onChange={(e) => setLocalTitle(e.target.value)}
+          autoFocus
         />
       );
     })
@@ -98,10 +104,10 @@
   
         setNewCardData(data.message);
         titleInputRef.current?.clear();
-        titleInputRef.current?.focus(); // 🔥 Fixes the "stuck" input
+        titleInputRef.current?.focus();
   
         setTimeout(() => {
-          onRefresh(); // Let UI settle first
+          onRefresh();
         }, 100);
       } catch (error) {
         console.error('Error creating new card:', error);
@@ -154,13 +160,10 @@
       formData.append('file', file);
   
       try {
-        const response = await fetch(
-          'http://127.0.0.1:5000/api/upload-csv',
-          {
-            method: 'POST',
-            body: formData
-          }
-        );
+        const response = await fetch('http://127.0.0.1:5000/api/upload-csv', {
+          method: 'POST',
+          body: formData
+        });
   
         const result = await response.json();
         if (response.ok) {
@@ -235,13 +238,11 @@
             </div>
           </div>
         )}
+  
         {activeTab === 'Editor' && (
           <div className="editor-sidebar">
             <div className="import-export-container">
-              <button
-                className="import-export-button"
-                onClick={handleImportClick}
-              >
+              <button className="import-export-button" onClick={handleImportClick}>
                 <img alt="csv icon" className="csv-icon" src={CSVicon} />
                 Import File
               </button>
@@ -256,9 +257,7 @@
                 {scrollBoxData.map((name, index) => (
                   <div
                     key={index}
-                    className={`csv-item ${
-                      selectedCsvItem === name ? 'selected' : ''
-                    }`}
+                    className={`csv-item ${selectedCsvItem === name ? 'selected' : ''}`}
                     onClick={() => handleCsvItemClick(name)}
                   >
                     {name}
@@ -275,7 +274,12 @@
             />
           </div>
         )}
-      </div>
+        {activeTab === 'Settings' && <div className="settings-sidebar"></div>}
+            <div className="logo-container">
+                <img alt="hsi logo" className="logo" src={HSI_logo} />
+                <img alt="fgcu logo" className="logo" src={FGCU_logo} />
+            </div>
+        </div>
     );
   };
   

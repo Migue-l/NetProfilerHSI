@@ -94,12 +94,12 @@ def newCard():
         csv_data = data.get('csvData', None)  # This is the name clicked in scroll box
 
         # Load the CSV
-        df = pd.read_csv("test.csv", dtype=str)
+        df = pd.read_csv(csv_file_path, dtype=str)
 
         matched_row = df[df["Name"].str.strip().str.lower() == str(csv_data).strip().lower()]
         if matched_row.empty:
             return jsonify({"error": f"No CSV match found for: {csv_data}"}), 404
-
+        
         full_data = matched_row.iloc[0].to_dict()
         full_data = {str(k).strip().lower(): str(v).strip() for k, v in full_data.items()}
         

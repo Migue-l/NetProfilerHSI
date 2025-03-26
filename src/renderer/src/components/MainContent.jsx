@@ -21,8 +21,8 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
     //  subcategories for each category
     const categorySubcategories = {
         Personal: ["First Name", "Last Name", "Alias", "DOB", "COB", "SSN", "Race", "Gender", "Height", "Weight", "Hair color", "Eye color", "Last Known Residence", "Employment"],
-        Contact: ["Phone #", "Email Address", "Date SAR Checked"],
-        Immigration: ["Passport (COC)", "Immigration Status", "SID #", "Travel"],
+        Contact: ["Phone #", "Email Address"],
+        Immigration: ["Passport COC", "Immigration Status", "SID #", "Travel"],
         Vehicle: ["Make", "Model", "Vehicle Tag #", "Color"],
         Affiliation: ["Social Media", "Associated Business"],
         Criminal: ["Suspected Role", "FBI #", "Active Warrants", "Criminal History", "SAR Activity", "Date SAR Checked", "Case #", "ROA #"]
@@ -279,6 +279,23 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         setCategories(categories.filter(c => c !== category));
     };
 
+    useEffect(() => {
+        const card = openCards[activeCardIndex];
+        if (card && !card.selectedCategory) {
+          const availableCategories = Object.keys(card.subcatValues || {});
+          if (availableCategories.length > 0) {
+            setOpenCards(prev => {
+              const updated = [...prev];
+              updated[activeCardIndex] = {
+                ...updated[activeCardIndex],
+                selectedCategory: availableCategories[0]
+              };
+              return updated;
+            });
+          }
+        }
+    }, [activeCardIndex]);      
+
 
     return (
         <div className="main-content">
@@ -396,7 +413,11 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                         <>
                                             <h2>Editing {openCards[activeCardIndex].selectedCategory}</h2>
                                             {categorySubcategories[openCards[activeCardIndex].selectedCategory]?.map(subcat => {
-                                                const currentValue = openCards[activeCardIndex].subcatValues?.[openCards[activeCardIndex].selectedCategory]?.[subcat] || "";
+                                                const subcatMap = openCards[activeCardIndex].subcatValues || {};
+                                                const category = openCards[activeCardIndex].selectedCategory;
+                                                const normalizedKey = subcat.toLowerCase();
+
+                                                const currentValue = (subcatMap[category]?.[normalizedKey] || subcatMap[normalizedKey] || "");
                                                 return (
                                                     <div key={subcat} style={{ marginBottom: '8px' }}>
                                                         <label>
@@ -404,11 +425,8 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                                             <input
                                                                 type="text"
                                                                 value={currentValue}
-                                                                onChange={e => handleSubcatChange(
-                                                                    openCards[activeCardIndex].selectedCategory,
-                                                                    subcat,
-                                                                    e.target.value
-                                                                )}
+                                                                onChange={e => handleSubcatChange( category, normalizedKey, e.target.value)
+                                                                }
                                                                 style={{ marginLeft: '8px' }}
                                                             />
                                                         </label>
@@ -426,7 +444,6 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                     </div>
                 </>
             )}
-
             {activeTab === 'Settings' && (
                 <div className="settings-container">
                     <div className="indivdual-settings-containers">

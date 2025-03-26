@@ -25,6 +25,41 @@ function App() {
     setRefreshKey((prevKey) => prevKey + 1);
   };
 
+  const categorizeSubcatValues = (flatValues) => {
+    const categoryMap = {
+      Personal: ["dob", "ssn", "gender", "race", "alias", "cob", "height", "weight", "hair color", "eye color", "last known residence", "employment"],
+      Contact: ["phone #", "email address"],
+      Immigration: ["immigration status", "passport coc", "sid #", "travel"],
+      Vehicle: ["make", "model", "vehicle tag #", "color"],
+      Affiliation: ["associated business", "social media"],
+      Criminal: ["criminal history", "fbi #", "active warrants", "sar activity", "case #", "roa #", "date sar checked", "suspected role"],
+      Other: []  // fallback
+    };
+  
+    const grouped = {};
+  
+    for (const [key, value] of Object.entries(flatValues)) {
+      const normalizedKey = key.toLowerCase();
+      let found = false;
+      for (const [category, fields] of Object.entries(categoryMap)) {
+        if (fields.includes(normalizedKey)) {
+          if (!grouped[category]) grouped[category] = {};
+          grouped[category][normalizedKey] = value;
+          found = true;
+          break;
+        }
+      }
+  
+      if (!found) {
+        if (!grouped.Other) grouped.Other = {};
+        grouped.Other[normalizedKey] = value;
+      }
+    }
+  
+    return grouped;
+  };  
+
+
   const handleCsvSelect = (csvItem) => {
     setCurrentCsvItem(csvItem);
     setShowModal(true);
@@ -60,7 +95,7 @@ function App() {
           filePath: data.filePath
         },
         selectedCategory: null,
-        subcatValues: {}
+        subcatValues: categorizeSubcatValues(data.subcatValues)
       };
 
       openCardRef.current = newCard; // 🧠 Save the card to be opened

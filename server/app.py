@@ -36,17 +36,6 @@ CORS(app, resources={
         "supports_credentials": True
     }
 })
-
-# Keep your existing constants
-#EXPECTED_COLUMNS = [
-   # "name", "alias", "dob", "ssn", "race", "gender", "driver license #",
-   # "passport#", "weight", "height", "hair color", "eye color"
-#]
-
-#csv_file_path = os.path.join(os.path.dirname(__file__), "people_data.csv")  # Changed to people_data.csv
-
-# Rest of your existing configuration
-#app.config['DEBUG'] = True
 card_manager = CardEntryManager()
 selected_directory = None
 
@@ -102,23 +91,42 @@ def newCard():
         location = data.get('location', None)
         created_at = data.get('createdAt', 'Unknown Time')
         title = data.get('title', "")
-        csv_data = data.get('csvData', None)  # New: Get CSV data
+        csv_data = data.get('csvData', None)  # This is the name clicked in scroll box
 
-        # Create card with CSV data if provided
+        # Load the CSV
+        df = pd.read_csv("test.csv", dtype=str)
+
+        matched_row = df[df["Name"].str.strip().str.lower() == str(csv_data).strip().lower()]
+        if matched_row.empty:
+            return jsonify({"error": f"No CSV match found for: {csv_data}"}), 404
+
+        full_data = matched_row.iloc[0].to_dict()
+        full_data = {str(k).strip().lower(): str(v).strip() for k, v in full_data.items()}
+        
+        print("✅ Returning subcatValues:", full_data)
+
+
+        # Create the card on disk (existing logic)
         result = card_manager.create_card(
             card_name, 
             location, 
             created_at, 
             title=title,
-            csv_data=csv_data  # Pass to card manager
+            csv_data=csv_data
         )
-        
+
         if "error" in result:
             return jsonify(result), 400
+        
+        return jsonify({
+            "filePath": result.get("filePath", ""),
+            "subcatValues": full_data
+        }), 201
 
-        return jsonify(result), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
 
 @app.route('/api/new-deck', methods=['POST'])
 def newDeck():

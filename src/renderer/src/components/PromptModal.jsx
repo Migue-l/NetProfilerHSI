@@ -13,6 +13,12 @@ const PromptModal = ({
     const [isVisible, setIsVisible] = useState(show);
 
     useEffect(() => {
+        if (show) {
+          setInputValue(defaultValue || "");
+        }
+    }, [show, defaultValue]);
+
+    useEffect(() => {
         setIsVisible(show);
     }, [show]);
 

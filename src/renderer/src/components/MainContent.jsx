@@ -3,15 +3,13 @@ import ReactDOM from "react-dom/client";
 import CardPreview from "./CardPreview.jsx";
 import useServerResponse from '../../../hooks/useServerResponse';
 
-const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, setActiveTab, refreshKey }) => {
+const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, setActiveTab, refreshKey, openCards, setOpenCards, activeCardIndex, setActiveCardIndex }) => {
     const [csvData, setCsvData] = useServerResponse('Waiting for csv data...');
     const [selectedDirectory, setLocalSelectedDirectory] = useState('');
     const [entries, setEntries] = useState([]);
     const [expandedDecks, setExpandedDecks] = useState({});
 
     // openCards array stores objects of { name, details, selectedCategory, subcatValues }
-    const [openCards, setOpenCards] = useState([]);
-    const [activeCardIndex, setActiveCardIndex] = useState(null);
 
     // States for category buttons (global list)
     const [categories, setCategories] = useState([
@@ -29,6 +27,8 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         Affiliation: ["Social Media", "Associated Business"],
         Criminal: ["Suspected Role", "FBI #", "Active Warrants", "Criminal History", "SAR Activity", "Date SAR Checked", "Case #", "ROA #"]
     };
+
+    console.log("MainContent rendered with tab:", activeTab);
 
     useEffect(() => {
         console.log("Current activeCardIndex:", activeCardIndex);
@@ -330,30 +330,10 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
 
                     {/* Editor Body */}
                     <div className="editor-container">
+                        {console.log("🧠 Current openCards:", openCards)}
+                        {console.log("🧠 Current activeCardIndex:", activeCardIndex)}
                         {activeCardIndex !== null && openCards[activeCardIndex] && (
                             <>
-                                {/* Enhanced CSV Data Display */}
-                                {openCards[activeCardIndex].details?.csvItem && (
-                                    <div className="csv-data-display">
-                                        <h3>CSV Data</h3>
-                                        <div className="csv-data-content">
-                                            <div className="csv-data-row">
-                                                <span className="csv-data-label">Original Value:</span>
-                                                <span className="csv-data-value">{openCards[activeCardIndex].details.csvItem}</span>
-                                            </div>
-                                            {openCards[activeCardIndex].details?.filePath && (
-                                                <div className="csv-data-row">
-                                                    <span className="csv-data-label">Stored At:</span>
-                                                    <span className="csv-data-value">
-                                                        {openCards[activeCardIndex].details.filePath}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            {/* Add more CSV-related data as needed */}
-                                        </div>
-                                    </div>
-                                )}
-
                                 {/* Regular Editor Content */}
                                 <div className="categories-container">
                                     <div className="add-category">

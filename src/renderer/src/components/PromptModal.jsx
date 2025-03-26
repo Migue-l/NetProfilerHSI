@@ -40,7 +40,9 @@ const PromptModal = ({
                 <h3>{title}</h3>
                 <p>{message}</p>
                 <input
+                    className = "input-name"
                     type="text"
+                    placeholder="Card Name"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}

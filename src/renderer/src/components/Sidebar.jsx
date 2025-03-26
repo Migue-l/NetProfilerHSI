@@ -36,7 +36,7 @@
           key={forceKey}
           ref={inputRef}
           type="text"
-          className="card-title-input"
+          className="search-bar"
           placeholder="Enter Card Title"
           value={localTitle}
           onChange={(e) => setLocalTitle(e.target.value)}

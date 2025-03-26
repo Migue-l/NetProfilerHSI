@@ -340,7 +340,7 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                 }}
                             >
                                 {card.details.title || card.name}
-                                <button onClick={(e) => closeTab(index, e)}>x</button>
+                                <button className="close-tab-button" onClick={(e) => closeTab(index, e)}>x</button>
                             </div>
                         ))}
                     </header>
@@ -353,21 +353,22 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                             <>
                                 {/* Regular Editor Content */}
                                 <div className="categories-container">
-                                    <div className="add-category">
+                                    <div className="add-category-container">
                                         {isAddingCategory ? (
                                             <div className="add-category">
                                                 <input
+                                                    className="input-category-name"
                                                     type="text"
                                                     placeholder="Enter category name"
                                                     value={newCategory}
                                                     onChange={(e) => setNewCategory(e.target.value)}
                                                     maxLength={20}
                                                 />
-                                                <button onClick={addCategory}>OK</button>
-                                                <button onClick={() => setIsAddingCategory(false)}>Cancel</button>
+                                                <button className="add-category-button" onClick={addCategory}>Add</button>
+                                                <button className="dont-add-category-button" onClick={() => setIsAddingCategory(false)}>Cancel</button>
                                             </div>
                                         ) : (
-                                            <button onClick={() => setIsAddingCategory(true)}>New Category</button>
+                                            <button className="new-category-button" onClick={() => setIsAddingCategory(true)}>New Category</button>
                                         )}
                                     </div>
                                     <div className="categories-list">
@@ -433,7 +434,7 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                                     </div>
                                                 );
                                             })}
-                                            <button onClick={handleSaveSubcatData}>Save</button>
+                                            <button className="save-button" onClick={handleSaveSubcatData}>Save</button>
                                         </>
                                     ) : (
                                         <p>Please select a category to edit subcategories.</p>

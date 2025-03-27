@@ -409,6 +409,7 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                     </div>
                                 </div>
                                 <div className="category-editing-panel">
+                                    <button className="save-button" onClick={handleSaveSubcatData}>Save Card</button>
                                     <button className="preview-button" onClick={handlePreviewClick}>Preview Card</button>
                                     {openCards[activeCardIndex].selectedCategory ? (
                                         <>
@@ -434,7 +435,6 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                                     </div>
                                                 );
                                             })}
-                                            <button className="save-button" onClick={handleSaveSubcatData}>Save</button>
                                         </>
                                     ) : (
                                         <p>Please select a category to edit subcategories.</p>

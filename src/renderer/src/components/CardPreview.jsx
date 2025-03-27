@@ -1,5 +1,6 @@
 import React from "react";
 import HSI_logo from "../assets/photos/HSI_logo.png";
+import Subject_Placeholder from "../assets/photos/Subject_Placeholder.png"
 
 const CardPreview = ({ card }) => {
   return (
@@ -138,6 +139,15 @@ const CardPreview = ({ card }) => {
           </div>
         </div>
 
+        <div className="photo-container">
+          <h3>Subject Photo</h3>
+          <div className="photo-box">
+            
+            <img src={Subject_Placeholder} alt="subject" />
+            
+          </div>
+        </div>
+
         <div className="category-container">
           <h3>Immigration</h3>
           <div className="subcategory">
@@ -189,6 +199,14 @@ const CardPreview = ({ card }) => {
             <input type="text" />
           </div>
         </div>
+      </div>
+
+      <div className="case-notes-container">
+        <h3>Case Notes</h3>
+        <textarea
+          className="case-notes-textarea"
+          placeholder="Additional Notes..."
+        />
       </div>
 
       <footer className="prev-footer">

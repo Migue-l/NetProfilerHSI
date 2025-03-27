@@ -101,9 +101,9 @@ function App() {
       openCardRef.current = newCard; // 🧠 Save the card to be opened
       setOpenCards(prev => [...prev, newCard]); // Trigger re-render
       setShowModal(false);
-      alert(`Card "${cardTitle}" created successfully!`);
+      //////// alert(`Card "${cardTitle}" created successfully!`);
     } catch (err) {
-      alert("Failed to create card: " + err.message);
+      //////// alert("Failed to create card: " + err.message);
       console.error(err);
     }
   };

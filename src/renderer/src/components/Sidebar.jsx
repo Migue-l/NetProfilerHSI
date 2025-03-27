@@ -71,7 +71,7 @@
       const cardTitle = titleInputRef.current?.getTitle().trim();
   
       if (!cardTitle) {
-        alert('Card title is required.');
+        //////// alert('Card title is required.');
         return;
       }
   
@@ -98,9 +98,9 @@
         }
   
         const data = await response.json();
-        alert(
-          `Card Created: ${data.cardName}\nTitle: ${cardTitle}\nSaved at: ${data.filePath}`
-        );
+        ////////  alert(
+        ////////   `Card Created: ${data.cardName}\nTitle: ${cardTitle}\nSaved at: ${data.filePath}`
+        //////// );
   
         setNewCardData(data.message);
         titleInputRef.current?.clear();
@@ -111,7 +111,7 @@
         }, 100);
       } catch (error) {
         console.error('Error creating new card:', error);
-        alert('Failed to create new card.');
+        //////// alert('Failed to create new card.');
       }
     };
   
@@ -135,11 +135,11 @@
         }
   
         const data = await response.json();
-        alert(`Deck Created: ${data.deckName}\nSaved at: ${data.filePath}`);
+        //////// alert(`Deck Created: ${data.deckName}\nSaved at: ${data.filePath}`);
         onRefresh();
       } catch (error) {
         console.error('Error creating new deck:', error);
-        alert('Failed to create new deck.');
+        //////// alert('Failed to create new deck.');
       }
     };
   
@@ -150,7 +150,7 @@
     const handleFileUpload = async (event) => {
       const file = event.target.files[0];
       if (!file) {
-        alert('Please select a file first!');
+        //////// alert('Please select a file first!');
         return;
       }
   
@@ -167,11 +167,11 @@
   
         const result = await response.json();
         if (response.ok) {
-          alert('File uploaded successfully!');
+          ////////  alert('File uploaded successfully!');
           await fetchCsvData();
         } else {
           console.error('Error response from backend:', result);
-          alert(result.error);
+          ////////  alert(result.error);
         }
       } catch (error) {
         console.error('Error uploading file:', error);

@@ -234,11 +234,11 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
             }
 
             const result = await response.json();
-            alert(`Subcategory data saved for ${currentCard.name}: ` + JSON.stringify(result.updatedData));
+            //////// alert(`Subcategory data saved for ${currentCard.name}: ` + JSON.stringify(result.updatedData));
 
         } catch (error) {
             console.error("Error saving subcategory data:", error);
-            alert("Error saving subcategory data: " + error.message);
+            //////// alert("Error saving subcategory data: " + error.message);
         }
     };
 

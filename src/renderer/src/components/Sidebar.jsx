@@ -13,19 +13,19 @@ const Sidebar = ({
     selectedDirectory,
     availableDecks,
     onRefresh,
-    onCsvSelect  // Add this
+    onCsvSelect  
 }) => {
     const [cardName, setCardName] = useState('');
     const [cardTitle, setCardTitle] = useState('');
     const [selectedLocation, setSelectedLocation] = useState('');
     const [csvEntries, setCsvEntries] = useState([]);
     const fileInputRef = useRef(null);
-  //const [selectedFile, setSelectedFile] = useState('');
+  
     const [scrollBoxData, setScrollBoxData] = useState([]);
     const [selectedCsvItem, setSelectedCsvItem] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
 
-  // Reset location when directory changes
+  
   useEffect(() => {
     setSelectedLocation('');
   }, [selectedDirectory]);
@@ -44,17 +44,21 @@ const Sidebar = ({
                     cardName: uniqueCardName,
                     title: cardTitle,
                     location: selectedLocation || "",
-                    createdAt: new Date().toISOString()
+                    createdAt: new Date().toISOString(),
+                    origin: "myCards" // Optional flag (Step 3)
                 }),
             });
+
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Failed to create card: ${errorText}`);
+                throw new Error(await response.text());
             }
+
             const data = await response.json();
             alert(`Card Created: ${data.cardName}\nTitle: ${cardTitle}\nSaved at: ${data.filePath}`);
             setNewCardData(data.message);
-            onRefresh()
+            onRefresh(); // Refresh the directory list
+
+            // Step 2: No auto-opening logic here!
         } catch (error) {
             console.error('Error creating new card:', error);
             alert('Failed to create new card.');
@@ -133,7 +137,7 @@ const Sidebar = ({
       if (response.ok) {
         console.log("Fetched CSV Data:", result.names)// Debugging log
         setScrollBoxData(result.names || []); // Update state with new names
-        console.log("Updated State:", scrollBoxData); // check if state is updating
+        console.log("Updated State:", scrollBoxData); g
       } else {
         console.error("Error fetching CSV data:", result.error);
       }
@@ -149,7 +153,7 @@ const Sidebar = ({
 
   const handleCsvItemClick = async (item) => {
     console.log("CSV item clicked:", item);
-    setSelectedCsvItem(item); // Set the selected item to highlight
+    setSelectedCsvItem(item); 
     await fetchCsvData();
     onCsvSelect(item);
   };

@@ -424,3 +424,17 @@
     margin-top: 0;
     color: #333;
 }
+
+
+.csv-origin {
+    border-left: 3px solid #4CAF50;
+}
+
+.csv-badge {
+    background: #4CAF50;
+    color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 0.7em;
+    margin-left: 5px;
+}

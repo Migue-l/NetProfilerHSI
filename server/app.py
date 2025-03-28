@@ -30,22 +30,17 @@ CORS(app)
 # Configure CORS more specifically
 CORS(app, resources={
     r"/api/*": {
-        "origins": ["http://localhost:5173"],  # Your Vite frontend
+        "origins": ["http://localhost:5173"],  
         "methods": ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
         "allow_headers": ["Content-Type"],
         "supports_credentials": True
     }
 })
 
-# Keep your existing constants
-#EXPECTED_COLUMNS = [
-   # "name", "alias", "dob", "ssn", "race", "gender", "driver license #",
-   # "passport#", "weight", "height", "hair color", "eye color"
 #]
 
 #csv_file_path = os.path.join(os.path.dirname(__file__), "people_data.csv")  # Changed to people_data.csv
 
-# Rest of your existing configuration
 #app.config['DEBUG'] = True
 card_manager = CardEntryManager()
 selected_directory = None
@@ -104,13 +99,13 @@ def newCard():
         title = data.get('title', "")
         csv_data = data.get('csvData', None)  # New: Get CSV data
 
-        # Create card with CSV data if provided
+        # Create card with CSV data
         result = card_manager.create_card(
             card_name, 
             location, 
             created_at, 
             title=title,
-            csv_data=csv_data  # Pass to card manager
+            csv_data=csv_data  
         )
         
         if "error" in result:
@@ -150,14 +145,14 @@ def upload_csv():
         
         print(f"DEBUG: Recieved file- {file.filename}")
 
-        # Read existing CSV or create an empty DataFrame if not present
+        # Read existing CSV or create an empty DataFrame 
         file_exists = os.path.exists(csv_file_path)
         if file_exists:
             existing_data = pd.read_csv(csv_file_path, dtype=str)
         else:
             existing_data = pd.DataFrame(columns=EXPECTED_COLUMNS)
 
-        # Read uploaded CSV
+        
         new_data = pd.read_csv(file, dtype=str)
 
          # Clean the data: Strip whitespace/tab from both columns and data
@@ -197,7 +192,7 @@ def get_csv_data():
             return jsonify({"error": "No data available"}), 400
 
         df = pd.read_csv(csv_file_path, dtype=str)
-        df = df.drop_duplicates()  # Add this line to remove duplicates
+        df = df.drop_duplicates()  
 
 
         if "Name" not in df.columns:

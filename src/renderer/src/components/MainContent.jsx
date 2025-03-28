@@ -279,6 +279,17 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         setCategories(categories.filter(c => c !== category));
     };
 
+    // In MainContent.jsx, make sure you have:
+    useEffect(() => {
+        if (activeCardIndex !== null && openCards[activeCardIndex]) {
+            // Scroll to or focus the active card
+            const activeTabElement = document.querySelector(`.editor-card-tab.active`);
+            if (activeTabElement) {
+                activeTabElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+    }, [activeCardIndex, openCards]);
+
 
     return (
         <div className="main-content">

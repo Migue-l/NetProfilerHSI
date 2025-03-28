@@ -29,47 +29,47 @@ function App() {
 
     const handleModalConfirm = async (cardTitle) => {
         try {
-            if (!cardTitle) return; // User cancelled
+            if (!cardTitle) return;
 
-            // Create a unique card name
             const cardName = `Net-Card-${Date.now()}`;
-
-            // Create the new card with CSV data
             const response = await fetch('http://127.0.0.1:5000/api/new-card', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    cardName: cardName,
+                    cardName,
                     title: cardTitle,
-                    location: "", // You can modify this to use selected directory
+                    location: "",
                     createdAt: new Date().toISOString(),
-                    csvData: currentCsvItem // Pass the CSV data
+                    csvData: currentCsvItem
                 }),
             });
 
             if (!response.ok) {
-                throw new Error(await response.text());
+                const errorText = await response.text();
+                throw new Error(errorText);
             }
 
             const data = await response.json();
 
-            // Add the new card to openCards
             const newCard = {
                 name: cardName,
                 details: {
                     type: "CSV Card",
                     title: cardTitle,
                     csvItem: currentCsvItem,
-                    filePath: data.filePath
+                    filePath: data.filePath,
+                    fromCsv: true
                 },
                 selectedCategory: null,
                 subcatValues: {}
             };
 
-            setOpenCards([...openCards, newCard]);
-            setActiveCardIndex(openCards.length);
+            // First update the openCards array
+            setOpenCards(prevCards => [...prevCards, newCard]);
+
+            // Then set the active card and tab
+            setActiveCardIndex(openCards.length); // Will be the new card's index
             setActiveTab("Editor");
-            alert(`Card "${cardTitle}" created successfully!`);
 
         } catch (error) {
             console.error('Error creating CSV card:', error);
@@ -108,7 +108,6 @@ function App() {
                     setActiveCardIndex={setActiveCardIndex}
                 />
 
-                {/* Prompt Modal for CSV Card Creation */}
                 <PromptModal
                     show={showModal}
                     title="Create Card from CSV"

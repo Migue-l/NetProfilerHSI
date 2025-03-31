@@ -8,6 +8,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import ReactDOM from 'react-dom/client';
 import CardPreview from './components/CardPreview.jsx';
+import {renderToString} from 'react-dom/server';
 
 function App() {
   const [activeTab, setActiveTab] = useState("My Cards");
@@ -27,32 +28,68 @@ function App() {
 
   const handleExportPDF = async () => {
     if (activeCardIndex === null || !openCards[activeCardIndex]) return;
-
     const card = openCards[activeCardIndex];
-
-    // Create a hidden div to render CardPreview for PDF capture
-    const previewContainer = document.createElement('div');
-    previewContainer.style.position = 'fixed';
-    previewContainer.style.left = '-9999px';
-    previewContainer.style.top = '0';
-    document.body.appendChild(previewContainer);
-
-    const root = ReactDOM.createRoot(previewContainer);
-    root.render(<CardPreview card={card} />);
-
-    setTimeout(async () => {
-      const canvas = await html2canvas(previewContainer, { scale: 2 });
+  
+    // 1. Render the CardPreview to an HTML string
+    const html = renderToString(<CardPreview card={card} />);
+  
+    // 2. Create an iframe sandbox to render styles correctly
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.left = '-9999px';
+    iframe.style.width = '1200px';
+    iframe.style.height = '1600px';
+    document.body.appendChild(iframe);
+  
+    const iframeDoc = iframe.contentWindow.document;
+    iframeDoc.open();
+    iframeDoc.write(`
+      <html>
+        <head>
+          <link rel="stylesheet" type="text/css" href="/src/assets/css/cardpreview.css" />
+        </head>
+        <body>
+          <div id="pdf-root">${html}</div>
+        </body>
+      </html>
+    `);
+    iframeDoc.close();
+  
+    // 3. Wait for iframe to fully load styles and layout
+    iframe.onload = async () => {
+      const previewElement = iframe.contentDocument.getElementById('pdf-root');
+    
+      // 1. Render to canvas at native dimensions
+      const canvas = await html2canvas(previewElement, {
+        scale: 2, // High-res render
+        useCORS: true
+      });
+    
+      // 2. PDF dimensions: 8.5in x 11in = 612pt x 792pt
+      const pdfWidth = 612;
+      const pdfHeight = 792;
+    
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'pt', // Points (1 in = 72 pt)
+        format: [pdfWidth, pdfHeight]
+      });
+    
+      // 3. Convert canvas pixels to points
+      const pxToPt = 72 / 198;
+      const imgWidth = canvas.width * pxToPt;
+      const imgHeight = canvas.height * pxToPt;
+    
+      // 4. Center it (optional, or set to 0,0 for full edge-to-edge)
+      const xOffset = (pdfWidth - imgWidth) / 2;
+      const yOffset = (pdfHeight - imgHeight) / 2;
+    
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`${card.name}.pdf`);
-
-      document.body.removeChild(previewContainer);
-    }, 1000);
+      pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
+    
+      pdf.save(`${card.name || 'Card'}.pdf`);
+      document.body.removeChild(iframe);
+    };    
   };
 
 

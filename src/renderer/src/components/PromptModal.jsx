@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import './PromptModal.css'; // We'll create this next
+import './PromptModal.css';
 
 const PromptModal = ({
-    title = "Enter Information",
-    message = "Please provide the required information:",
+    title = "Notification",
+    message = "",
     defaultValue = "",
     onConfirm,
     onCancel,
-    show = true
+    show = true,
+    showInput = true // Add this new prop
 }) => {
     const [inputValue, setInputValue] = useState(defaultValue);
     const [isVisible, setIsVisible] = useState(show);
+
+    useEffect(() => {
+        if (show) {
+            setInputValue(defaultValue || "");
+        }
+    }, [show, defaultValue]);
 
     useEffect(() => {
         setIsVisible(show);
@@ -18,7 +25,7 @@ const PromptModal = ({
 
     const handleConfirm = () => {
         setIsVisible(false);
-        onConfirm(inputValue);
+        onConfirm(showInput ? inputValue : true); // Only pass value if showInput is true
     };
 
     const handleCancel = () => {
@@ -33,19 +40,28 @@ const PromptModal = ({
             <div className="modal-content">
                 <h3>{title}</h3>
                 <p>{message}</p>
-                <input
-                    type="text"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}
-                    autoFocus
-                />
+
+                {/* Conditionally render input field */}
+                {showInput && (
+                    <input
+                        className="input-name"
+                        type="text"
+                        placeholder="Card Name"
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}
+                        autoFocus
+                    />
+                )}
+
                 <div className="modal-buttons">
-                    <button className="modal-cancel" onClick={handleCancel}>
-                        Cancel
-                    </button>
+                    {showInput && ( // Only show Cancel button when there's input
+                        <button className="modal-cancel" onClick={handleCancel}>
+                            Cancel
+                        </button>
+                    )}
                     <button className="modal-confirm" onClick={handleConfirm}>
-                        Confirm
+                        OK
                     </button>
                 </div>
             </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import TabHeader from './components/TabHeader.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import MainContent from './components/MainContent.jsx';
@@ -14,40 +14,91 @@ function App() {
     const [openCards, setOpenCards] = useState([]);
     const [activeCardIndex, setActiveCardIndex] = useState(null);
 
-    // Modal state
-    const [showModal, setShowModal] = useState(false);
+    // Modal states
+    const [showCsvModal, setShowCsvModal] = useState(false);
     const [currentCsvItem, setCurrentCsvItem] = useState(null);
+    const [notificationModal, setNotificationModal] = useState({
+        show: false,
+        title: "",
+        message: "",
+        showInput: false
+    });
+
+    const openCardRef = useRef(null);
 
     const handleRefresh = () => {
         setRefreshKey((prevKey) => prevKey + 1);
     };
 
-    const handleCsvSelect = (csvItem) => {
-        setCurrentCsvItem(csvItem);
-        setShowModal(true);
+    const categorizeSubcatValues = (flatValues) => {
+        const categoryMap = {
+            Personal: ["dob", "ssn", "gender", "race", "alias", "cob", "height", "weight", "hair color", "eye color", "last known residence", "employment", "name"],
+            Contact: ["phone #", "email address"],
+            Immigration: ["immigration status", "passport coc", "sid #", "travel"],
+            Vehicle: ["make", "model", "vehicle tag #", "color"],
+            Affiliation: ["associated business", "social media"],
+            Criminal: ["criminal history", "fbi #", "active warrants", "sar activity", "case #", "roa #", "date sar checked", "suspected role"],
+            Other: []
+        };
+
+        const grouped = {};
+
+        for (const [key, value] of Object.entries(flatValues)) {
+            const normalizedKey = key.toLowerCase();
+            let found = false;
+            for (const [category, fields] of Object.entries(categoryMap)) {
+                if (fields.includes(normalizedKey)) {
+                    if (!grouped[category]) grouped[category] = {};
+                    grouped[category][normalizedKey] = value;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                if (!grouped.Other) grouped.Other = {};
+                grouped.Other[normalizedKey] = value;
+            }
+        }
+
+        return grouped;
     };
 
-    const handleModalConfirm = async (cardTitle) => {
+    const handleCsvSelect = (csvItem) => {
+        setCurrentCsvItem(csvItem);
+        setShowCsvModal(true);
+    };
+
+    const showNotification = (title, message) => {
+        setNotificationModal({
+            show: true,
+            title,
+            message,
+            showInput: false
+        });
+    };
+
+    const handleCsvModalConfirm = async (cardTitle) => {
         try {
-            if (!cardTitle) return;
+            if (!cardTitle) {
+                showNotification("Error", "Card title is required");
+                return;
+            }
 
             const cardName = `Net-Card-${Date.now()}`;
-            const response = await fetch('http://127.0.0.1:5000/api/new-card', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+            const response = await fetch("http://127.0.0.1:5000/api/new-card", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     cardName,
                     title: cardTitle,
                     location: "",
                     createdAt: new Date().toISOString(),
                     csvData: currentCsvItem
-                }),
+                })
             });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText);
-            }
+            if (!response.ok) throw new Error(await response.text());
 
             const data = await response.json();
 
@@ -57,27 +108,31 @@ function App() {
                     type: "CSV Card",
                     title: cardTitle,
                     csvItem: currentCsvItem,
-                    filePath: data.filePath,
-                    fromCsv: true
+                    filePath: data.filePath
                 },
                 selectedCategory: null,
-                subcatValues: {}
+                subcatValues: categorizeSubcatValues(data.subcatValues)
             };
 
-            // First update the openCards array
-            setOpenCards(prevCards => [...prevCards, newCard]);
-
-            // Then set the active card and tab
-            setActiveCardIndex(openCards.length); // Will be the new card's index
-            setActiveTab("Editor");
-
-        } catch (error) {
-            console.error('Error creating CSV card:', error);
-            alert('Failed to create card: ' + error.message);
-        } finally {
-            setShowModal(false);
+            openCardRef.current = newCard;
+            setOpenCards(prev => [...prev, newCard]);
+            setShowCsvModal(false);
+            showNotification("Success", `Card "${cardTitle}" created successfully!`);
+        } catch (err) {
+            showNotification("Error", "Failed to create card: " + err.message);
+            console.error(err);
         }
     };
+
+    useEffect(() => {
+        if (!openCardRef.current || openCards.length === 0) return;
+        const index = openCards.findIndex(card => card.name === openCardRef.current.name);
+        if (index !== -1) {
+            setActiveCardIndex(index);
+            setActiveTab("Editor");
+            openCardRef.current = null;
+        }
+    }, [openCards]);
 
     return (
         <div className="app-container">
@@ -94,6 +149,7 @@ function App() {
                     setActiveCardIndex={setActiveCardIndex}
                     setActiveTab={setActiveTab}
                     onCsvSelect={handleCsvSelect}
+                    showNotification={showNotification}
                 />
                 <MainContent
                     activeTab={activeTab}
@@ -106,15 +162,26 @@ function App() {
                     setOpenCards={setOpenCards}
                     activeCardIndex={activeCardIndex}
                     setActiveCardIndex={setActiveCardIndex}
+                    showNotification={showNotification}
                 />
 
+                {/* CSV Card Creation Modal */}
                 <PromptModal
-                    show={showModal}
+                    show={showCsvModal}
                     title="Create Card from CSV"
-                    message="Enter a title for this CSV card:"
+                    message="Enter a title for this card:"
                     defaultValue={currentCsvItem || ""}
-                    onConfirm={handleModalConfirm}
-                    onCancel={() => setShowModal(false)}
+                    onConfirm={handleCsvModalConfirm}
+                    onCancel={() => setShowCsvModal(false)}
+                />
+
+                {/* Notification Modal */}
+                <PromptModal
+                    show={notificationModal.show}
+                    title={notificationModal.title}
+                    message={notificationModal.message}
+                    showInput={false} // This hides the input field
+                    onConfirm={() => setNotificationModal({ ...notificationModal, show: false })}
                 />
             </div>
         </div>

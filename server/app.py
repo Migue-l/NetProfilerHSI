@@ -37,10 +37,15 @@ CORS(app, resources={
     }
 })
 
+# Keep your existing constants
+#EXPECTED_COLUMNS = [
+   # "name", "alias", "dob", "ssn", "race", "gender", "driver license #",
+   # "passport#", "weight", "height", "hair color", "eye color"
 #]
 
 #csv_file_path = os.path.join(os.path.dirname(__file__), "people_data.csv")  # Changed to people_data.csv
 
+# Rest of your existing configuration
 #app.config['DEBUG'] = True
 card_manager = CardEntryManager()
 selected_directory = None
@@ -97,36 +102,43 @@ def newCard():
         location = data.get('location', None)
         created_at = data.get('createdAt', 'Unknown Time')
         title = data.get('title', "")
-        csv_data = data.get('csvData', None)  # New: Get CSV data
+        csv_data = data.get('csvData', None)  # optional
 
-        # Create card with CSV data
+        # 🧠 Default values if no CSV selected
+        full_data = {}
+
+        if csv_data:  # Only search test.csv if a name is provided
+            df = pd.read_csv(csv_file_path, dtype=str)
+            matched_row = df[df["Name"].str.strip().str.lower() == str(csv_data).strip().lower()]
+            if matched_row.empty:
+                return jsonify({"error": f"No CSV match found for: {csv_data}"}), 404
+
+            full_data = matched_row.iloc[0].to_dict()
+
+            def safe_strip(val):
+                return str(val).strip() if val is not None else ""
+
+            full_data = {str(k).strip().lower(): safe_strip(v) for k, v in full_data.items()}
+
+            print("✅ Returning subcatValues:", full_data)
+
+        # 🧱 Card is created either way
         result = card_manager.create_card(
-            card_name, 
-            location, 
-            created_at, 
+            card_name,
+            location,
+            created_at,
             title=title,
-            csv_data=csv_data  
+            csv_data=csv_data
         )
-        
+
         if "error" in result:
             return jsonify(result), 400
 
-        return jsonify(result), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({
+            "filePath": result.get("filePath", ""),
+            "subcatValues": full_data
+        }), 201
 
-@app.route('/api/new-deck', methods=['POST'])
-def newDeck():
-    try:
-        data = request.get_json()
-        deck_name = data.get('deckName', 'Unnamed_Deck')
-        location = data.get('location', None)
-
-        result = card_manager.create_deck(deck_name, location)
-        if "error" in result:
-            return jsonify(result), 400
-
-        return jsonify(result), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     

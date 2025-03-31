@@ -1,6 +1,7 @@
 import React from 'react';
 
 const TabHeader = ({ activeTab, setActiveTab }) => {
+  console.log("TabHeader activeTab:", activeTab);
   return (
     <header className="tab-header">
       <div

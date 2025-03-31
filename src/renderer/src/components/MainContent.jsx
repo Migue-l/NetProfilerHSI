@@ -3,15 +3,13 @@ import ReactDOM from "react-dom/client";
 import CardPreview from "./CardPreview.jsx";
 import useServerResponse from '../../../hooks/useServerResponse';
 
-const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, setActiveTab, refreshKey }) => {
+const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, setActiveTab, refreshKey, openCards, setOpenCards, activeCardIndex, setActiveCardIndex }) => {
     const [csvData, setCsvData] = useServerResponse('Waiting for csv data...');
     const [selectedDirectory, setLocalSelectedDirectory] = useState('');
     const [entries, setEntries] = useState([]);
     const [expandedDecks, setExpandedDecks] = useState({});
 
     // openCards array stores objects of { name, details, selectedCategory, subcatValues }
-    const [openCards, setOpenCards] = useState([]);
-    const [activeCardIndex, setActiveCardIndex] = useState(null);
 
     // States for category buttons (global list)
     const [categories, setCategories] = useState([
@@ -22,13 +20,15 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
 
     //  subcategories for each category
     const categorySubcategories = {
-        Personal: ["First Name", "Last Name", "Alias", "DOB", "COB", "SSN", "Race", "Gender", "Height", "Weight", "Hair color", "Eye color", "Last Known Residence", "Employment"],
-        Contact: ["Phone #", "Email Address", "Date SAR Checked"],
-        Immigration: ["Passport (COC)", "Immigration Status", "SID #", "Travel"],
+        Personal: ["Name", "Alias", "DOB", "COB", "SSN", "Race", "Gender", "Height", "Weight", "Hair color", "Eye color", "Last Known Residence", "Employment"],
+        Contact: ["Phone #", "Email Address"],
+        Immigration: ["Passport COC", "Immigration Status", "SID #", "Travel"],
         Vehicle: ["Make", "Model", "Vehicle Tag #", "Color"],
         Affiliation: ["Social Media", "Associated Business"],
         Criminal: ["Suspected Role", "FBI #", "Active Warrants", "Criminal History", "SAR Activity", "Date SAR Checked", "Case #", "ROA #"]
     };
+
+    console.log("MainContent rendered with tab:", activeTab);
 
     useEffect(() => {
         console.log("Current activeCardIndex:", activeCardIndex);
@@ -234,11 +234,13 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
             }
 
             const result = await response.json();
-            alert(`Subcategory data saved for ${currentCard.name}: ` + JSON.stringify(result.updatedData));
+            showNotification("Success", JSON.stringify(result.updatedData) || "Subcategory data saved!");
+            //////// alert(`Subcategory data saved for ${currentCard.name}: ` + JSON.stringify(result.updatedData));
 
         } catch (error) {
             console.error("Error saving subcategory data:", error);
-            alert("Error saving subcategory data: " + error.message);
+            showNotification("Error", error.message || "Error saving subcategory data:");
+            //////// alert("Error saving subcategory data: " + error.message);
         }
     };
 
@@ -279,16 +281,22 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
         setCategories(categories.filter(c => c !== category));
     };
 
-    // In MainContent.jsx, make sure you have:
     useEffect(() => {
-        if (activeCardIndex !== null && openCards[activeCardIndex]) {
-            // Scroll to or focus the active card
-            const activeTabElement = document.querySelector(`.editor-card-tab.active`);
-            if (activeTabElement) {
-                activeTabElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
+        const card = openCards[activeCardIndex];
+        if (card && !card.selectedCategory) {
+          const availableCategories = Object.keys(card.subcatValues || {});
+          if (availableCategories.length > 0) {
+            setOpenCards(prev => {
+              const updated = [...prev];
+              updated[activeCardIndex] = {
+                ...updated[activeCardIndex],
+                selectedCategory: availableCategories[0]
+              };
+              return updated;
+            });
+          }
         }
-    }, [activeCardIndex, openCards]);
+    }, [activeCardIndex]);      
 
 
     return (
@@ -334,54 +342,35 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                 }}
                             >
                                 {card.details.title || card.name}
-                                <button onClick={(e) => closeTab(index, e)}>x</button>
+                                <button className="close-tab-button" onClick={(e) => closeTab(index, e)}>x</button>
                             </div>
                         ))}
                     </header>
 
                     {/* Editor Body */}
                     <div className="editor-container">
+                        {console.log("🧠 Current openCards:", openCards)}
+                        {console.log("🧠 Current activeCardIndex:", activeCardIndex)}
                         {activeCardIndex !== null && openCards[activeCardIndex] && (
                             <>
-                                {/* Enhanced CSV Data Display */}
-                                {openCards[activeCardIndex].details?.csvItem && (
-                                    <div className="csv-data-display">
-                                        <h3>CSV Data</h3>
-                                        <div className="csv-data-content">
-                                            <div className="csv-data-row">
-                                                <span className="csv-data-label">Original Value:</span>
-                                                <span className="csv-data-value">{openCards[activeCardIndex].details.csvItem}</span>
-                                            </div>
-                                            {openCards[activeCardIndex].details?.filePath && (
-                                                <div className="csv-data-row">
-                                                    <span className="csv-data-label">Stored At:</span>
-                                                    <span className="csv-data-value">
-                                                        {openCards[activeCardIndex].details.filePath}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            {/* Add more CSV-related data as needed */}
-                                        </div>
-                                    </div>
-                                )}
-
                                 {/* Regular Editor Content */}
                                 <div className="categories-container">
-                                    <div className="add-category">
+                                    <div className="add-category-container">
                                         {isAddingCategory ? (
                                             <div className="add-category">
                                                 <input
+                                                    className="input-category-name"
                                                     type="text"
-                                                    placeholder="Enter category name"
+                                                    placeholder="Enter Category Name"
                                                     value={newCategory}
                                                     onChange={(e) => setNewCategory(e.target.value)}
                                                     maxLength={20}
                                                 />
-                                                <button onClick={addCategory}>OK</button>
-                                                <button onClick={() => setIsAddingCategory(false)}>Cancel</button>
+                                                <button className="add-category-button" onClick={addCategory}>Add</button>
+                                                <button className="dont-add-category-button" onClick={() => setIsAddingCategory(false)}>Cancel</button>
                                             </div>
                                         ) : (
-                                            <button onClick={() => setIsAddingCategory(true)}>New Category</button>
+                                            <button className="new-category-button" onClick={() => setIsAddingCategory(true)}>New Category</button>
                                         )}
                                     </div>
                                     <div className="categories-list">
@@ -422,12 +411,17 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                     </div>
                                 </div>
                                 <div className="category-editing-panel">
+                                    <button className="preview-button" onClick={handleSaveSubcatData}>Save Card</button>
                                     <button className="preview-button" onClick={handlePreviewClick}>Preview Card</button>
                                     {openCards[activeCardIndex].selectedCategory ? (
                                         <>
                                             <h2>Editing {openCards[activeCardIndex].selectedCategory}</h2>
                                             {categorySubcategories[openCards[activeCardIndex].selectedCategory]?.map(subcat => {
-                                                const currentValue = openCards[activeCardIndex].subcatValues?.[openCards[activeCardIndex].selectedCategory]?.[subcat] || "";
+                                                const subcatMap = openCards[activeCardIndex].subcatValues || {};
+                                                const category = openCards[activeCardIndex].selectedCategory;
+                                                const normalizedKey = subcat.toLowerCase();
+
+                                                const currentValue = (subcatMap[category]?.[normalizedKey] || subcatMap[normalizedKey] || "");
                                                 return (
                                                     <div key={subcat} style={{ marginBottom: '8px' }}>
                                                         <label>
@@ -435,18 +429,14 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                                                             <input
                                                                 type="text"
                                                                 value={currentValue}
-                                                                onChange={e => handleSubcatChange(
-                                                                    openCards[activeCardIndex].selectedCategory,
-                                                                    subcat,
-                                                                    e.target.value
-                                                                )}
+                                                                onChange={e => handleSubcatChange( category, normalizedKey, e.target.value)
+                                                                }
                                                                 style={{ marginLeft: '8px' }}
                                                             />
                                                         </label>
                                                     </div>
                                                 );
                                             })}
-                                            <button onClick={handleSaveSubcatData}>Save</button>
                                         </>
                                     ) : (
                                         <p>Please select a category to edit subcategories.</p>
@@ -457,7 +447,6 @@ const MainContent = ({ activeTab, newCardData, setSelectedDirectory, setDecks, s
                     </div>
                 </>
             )}
-
             {activeTab === 'Settings' && (
                 <div className="settings-container">
                     <div className="indivdual-settings-containers">

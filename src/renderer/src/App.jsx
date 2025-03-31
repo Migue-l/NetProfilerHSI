@@ -4,6 +4,10 @@ import Sidebar from './components/Sidebar.jsx';
 import MainContent from './components/MainContent.jsx';
 import useServerResponse from '../../hooks/useServerResponse';
 import PromptModal from './components/PromptModal';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import ReactDOM from 'react-dom/client';
+import CardPreview from './components/CardPreview.jsx';
 
 function App() {
   const [activeTab, setActiveTab] = useState("My Cards");
@@ -20,6 +24,37 @@ function App() {
   // Modal state
   const [showModal, setShowModal] = useState(false);
   const [currentCsvItem, setCurrentCsvItem] = useState(null);
+
+  const handleExportPDF = async () => {
+    if (activeCardIndex === null || !openCards[activeCardIndex]) return;
+
+    const card = openCards[activeCardIndex];
+
+    // Create a hidden div to render CardPreview for PDF capture
+    const previewContainer = document.createElement('div');
+    previewContainer.style.position = 'fixed';
+    previewContainer.style.left = '-9999px';
+    previewContainer.style.top = '0';
+    document.body.appendChild(previewContainer);
+
+    const root = ReactDOM.createRoot(previewContainer);
+    root.render(<CardPreview card={card} />);
+
+    setTimeout(async () => {
+      const canvas = await html2canvas(previewContainer, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`${card.name}.pdf`);
+
+      document.body.removeChild(previewContainer);
+    }, 1000);
+  };
+
 
   const handleRefresh = () => {
     setRefreshKey((prevKey) => prevKey + 1);
@@ -136,6 +171,7 @@ function App() {
           setActiveCardIndex={setActiveCardIndex}
           setActiveTab={setActiveTab}
           onCsvSelect={handleCsvSelect}
+          onExportClick={handleExportPDF}
         />
         <MainContent
           activeTab={activeTab}

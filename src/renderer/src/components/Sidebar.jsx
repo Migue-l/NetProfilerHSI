@@ -53,7 +53,8 @@
     selectedDirectory,
     availableDecks,
     onRefresh,
-    onCsvSelect
+    onCsvSelect,
+    onExportClick
   }) => {
     const [cardName, setCardName] = useState('');
     const [selectedLocation, setSelectedLocation] = useState('');
@@ -246,7 +247,7 @@
                 <img alt="csv icon" className="csv-icon" src={CSVicon} />
                 Import File
               </button>
-              <button className="import-export-button">
+              <button className="import-export-button" onClick={onExportClick}>
                 <img alt="pdf icon" className="pdf-icon" src={PDFicon} />
                 Export File
               </button>

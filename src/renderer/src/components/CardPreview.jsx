@@ -15,7 +15,6 @@ const CardPreview = ({ card }) => {
       <header className="prev-header">
         <div className="document-title">
           <h1>UNCLASSIFIED / LAW ENFORCEMENT / SENSITIVE RESTRICTED</h1>
-          <p>TEST should display card name: {card.name}</p>
         </div>
 
         <div className="prev-logo-container">

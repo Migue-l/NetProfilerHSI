@@ -3,6 +3,7 @@ import threading
 import csv
 import json
 import tkinter as tk
+from datetime import datetime
 from tkinter import filedialog
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -216,6 +217,79 @@ def get_csv_data():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+@app.route('/api/batch-create-cards', methods=['POST'])
+def batch_create_cards():
+    try:
+        global selected_directory
+        if not selected_directory:
+            return jsonify({"error": "No directory selected"}), 400
+
+        csv_file_path = os.path.join(os.path.dirname(__file__), "test.csv")
+        if not os.path.exists(csv_file_path):
+            return jsonify({"error": "CSV file not found"}), 404
+
+        df = pd.read_csv(csv_file_path, dtype=str).fillna("")
+        if "Name" not in df.columns:
+            return jsonify({"error": "CSV is missing 'Name' column"}), 400
+
+        created_count = 0
+        created_names = []
+
+        for _, row in df.iterrows():
+            title = row["Name"].strip()
+            card_name = f"Net-Card-{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}"
+            created_at = datetime.now().isoformat()
+            full_data = {str(k).strip().lower(): str(v).strip() for k, v in row.items()}
+            created_names.append(title)
+
+            def categorize(flatValues):
+                from collections import defaultdict
+                category_map = {
+                    "Personal": ["dob", "ssn", "gender", "race", "alias", "cob", "height", "weight", "hair color", "eye color", "last known residence", "employment", "name"],
+                    "Contact": ["phone #", "email address"],
+                    "Immigration": ["immigration status", "passport coc", "sid #", "travel"],
+                    "Vehicle": ["make", "model", "vehicle tag #", "color"],
+                    "Affiliation": ["associated business", "social media"],
+                    "Criminal": ["criminal history", "fbi #", "active warrants", "sar activity", "case #", "roa #", "date sar checked", "suspected role"],
+                    "Other": []
+                }
+
+                grouped = defaultdict(dict)
+                for key, val in flatValues.items():
+                    norm_key = key.lower()
+                    matched = False
+                    for cat, fields in category_map.items():
+                        if norm_key in fields:
+                            grouped[cat][norm_key] = val
+                            matched = True
+                            break
+                    if not matched:
+                        grouped["Other"][norm_key] = val
+                return dict(grouped)
+
+            subcat_values = categorize(full_data)
+
+            card_manager.create_card(
+                card_name=card_name,
+                location=None,
+                created_at=created_at,
+                title=title,
+                subcategories=subcat_values
+            )
+
+            created_count += 1
+
+        return jsonify({
+            "message": "Batch created",
+            "created": created_count,
+            "created_titles": created_names
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
     
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, threaded=True)

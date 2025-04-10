@@ -11,27 +11,28 @@
     z-index: 1000;
 }
 
-/* Pop-up Modal */
 .modal-content {
     background: white;
     padding: 20px;
     border-radius: 8px;
     width: 350px;
     box-shadow: 3px 4px rgba(0, 0, 0, 0.144);
+    text-align: center;
 }
 
     .modal-content h3 {
         margin-top: 0;
         color: #333;
+        font-size: 1.2em;
     }
 
     .modal-content p {
-        margin-top: 4px;
-        margin-bottom: 15px;
+        margin: 15px 0;
         color: #666;
+        line-height: 1.4;
     }
 
-    .modal-content input {
+    .modal-content .input-name {
         width: 100%;
         padding: 10px;
         margin-bottom: 15px;
@@ -40,63 +41,41 @@
         font-size: 14px;
     }
 
-    .modal-content:focus{
-        border-color: #04548b;
-    }
+        .modal-content .input-name:focus {
+            border-color: #04548b;
+            outline: none;
+        }
 
 .modal-buttons {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     gap: 10px;
+    margin-top: 20px;
 }
 
-.input-name:focus {
-    border-color: #04548b;
-    outline: none;
-  }
-
 .modal-confirm, .modal-cancel {
-    padding: 8px 15px;
+    padding: 8px 20px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
-
-    transition:
-        box-shadow 0.3s ease,
-        transform 0.2s ease,
-        background-color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .modal-confirm {
     background-color: #045385;
-    box-shadow: 0 3px 0px #033f64;
     color: white;
 }
 
     .modal-confirm:hover {
-        box-shadow: 0 5px 0px #045b91;
-        transform: translateY(-2px);
         background-color: #047bb3;
-    }
-  
-    .modal-confirm:active {
-        transform: translateY(0.1px);
     }
 
 .modal-cancel {
     background-color: #992f2f;
-    box-shadow: 0 3px 0px #680909;
     color: white;
 }
 
     .modal-cancel:hover {
-        box-shadow: 0 5px 0px #940404;
-        transform: translateY(-1px);
         background-color: #bd2727;
     }
-
-    .modal-cancel:active {
-        transform: translateY(0.1px);
-    }
-      

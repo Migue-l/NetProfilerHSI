@@ -77,10 +77,10 @@ class CardEntryManager:
     
         file_path = os.path.join(save_path, f"{card_name}.csv")
     
-    # Prepare rows including CSV data if provided
+    # Prepare rows including CSV data i
         rows = self._prepare_card_rows(card_name, created_at, title, subcategories)
     
-    # Add CSV data if provided
+    # Add CSV dat
         if csv_data:
             rows.append({
             "Card Name": card_name,

@@ -1,0 +1,14 @@
+# Flask and related web libraries
+Flask>=3.1.0              # Core web framework
+Flask-Cors>=5.0.0         # Cross-origin resource sharing support
+Werkzeug>=3.1.3           # Used internally by Flask
+Jinja2>=3.1.5             # Template engine (not directly used, but required by Flask)
+itsdangerous>=2.2.0       # Security serializer (used by Flask for session signing)
+MarkupSafe>=3.0.2         # Used by Jinja2
+
+# Data processing
+pandas>=2.2.3             # For CSV manipulation
+numpy>=2.2.0              # Optional but not directly used — can be removed unless you plan to do numeric processing
+
+# CLI and utility (used indirectly or via Flask)
+click>=8.1.8              # CLI support for Flask

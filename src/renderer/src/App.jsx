@@ -136,10 +136,15 @@ function App() {
         return grouped;
     };
 
-    const handleCsvSelect = (csvItem) => {
-        setCurrentCsvItem(csvItem);
-        setShowCsvModal(true);
-    };
+    const handleCsvSelect = (csvItem, options = {}) => {
+        const { isBatch = false } = options;
+        if (isBatch) {
+          createCardFromCsv(csvItem); // 🚫 no modal
+        } else {
+          setCurrentCsvItem(csvItem);
+          setShowCsvModal(true); // ✅ prompt user
+        }
+    };      
 
     const showNotification = (title, message) => {
         setNotificationModal({
@@ -195,6 +200,44 @@ function App() {
             console.error(err);
         }
     };
+
+    const createCardFromCsv = async (csvItem) => {
+        try {
+          const cardName = `Net-Card-${Date.now()}`;
+          const response = await fetch("http://127.0.0.1:5000/api/new-card", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              cardName,
+              title: csvItem,
+              location: "",
+              createdAt: new Date().toISOString(),
+              csvData: csvItem
+            })
+          });
+      
+          if (!response.ok) throw new Error(await response.text());
+      
+          const data = await response.json();
+          const newCard = {
+            name: cardName,
+            details: {
+              type: "CSV Card",
+              title: csvItem,
+              csvItem,
+              filePath: data.filePath
+            },
+            selectedCategory: null,
+            subcatValues: categorizeSubcatValues(data.subcatValues)
+          };
+      
+          openCardRef.current = newCard;
+          setOpenCards(prev => [...prev, newCard]);
+        } catch (err) {
+          showNotification("Error", `Failed to create card: ${err.message}`);
+          console.error(err);
+        }
+      };      
 
     useEffect(() => {
         if (!openCardRef.current || openCards.length === 0) return;

@@ -22,7 +22,7 @@ EXPECTED_COLUMNS = [
     "suspected role", "fbi #", "active warrants", "criminal history", "sar activity", "case #", "roa #"
 ]
 
-csv_file_path = os.path.join(os.path.dirname(__file__), "test.csv")
+csv_file_path = os.path.join(os.path.dirname(__file__), "backend.csv")
 
 # Enable Flask debug mode
 app.config['DEBUG'] = True
@@ -37,12 +37,6 @@ CORS(app, resources={
         "supports_credentials": True
     }
 })
-
-# Keep your existing constants
-#EXPECTED_COLUMNS = [
-   # "name", "alias", "dob", "ssn", "race", "gender", "driver license #",
-   # "passport#", "weight", "height", "hair color", "eye color"
-#]
 
 #csv_file_path = os.path.join(os.path.dirname(__file__), "people_data.csv")  # Changed to people_data.csv
 
@@ -108,7 +102,7 @@ def newCard():
         # 🧠 Default values if no CSV selected
         full_data = {}
 
-        if csv_data:  # Only search test.csv if a name is provided
+        if csv_data:  # Only search backend.csv if a name is provided
             df = pd.read_csv(csv_file_path, dtype=str)
             matched_row = df[df["Name"].str.strip().str.lower() == str(csv_data).strip().lower()]
             if matched_row.empty:
@@ -186,7 +180,7 @@ def upload_csv():
         with open(csv_file_path, 'a', newline='') as f:
             if file_exists:
                 f.write("\n")
-            new_data.to_csv(f, index=False, header=not file_exists, lineterminator="\n")  # Save back to test.csv
+            new_data.to_csv(f, index=False, header=not file_exists, lineterminator="\n")  # Save back to backend.csv
 
         # Return updated data
         return jsonify({
@@ -200,7 +194,7 @@ def upload_csv():
 @app.route('/api/get-csv-data', methods=['GET'])
 def get_csv_data():
     try:
-        csv_file_path = os.path.join(os.path.dirname(__file__), "test.csv")
+        csv_file_path = os.path.join(os.path.dirname(__file__), "backend.csv")
         if not os.path.exists(csv_file_path):
             return jsonify({"error": "No data available"}), 400
 
@@ -226,7 +220,7 @@ def batch_create_cards():
         if not selected_directory:
             return jsonify({"error": "No directory selected"}), 400
 
-        csv_file_path = os.path.join(os.path.dirname(__file__), "test.csv")
+        csv_file_path = os.path.join(os.path.dirname(__file__), "backend.csv")
         if not os.path.exists(csv_file_path):
             return jsonify({"error": "CSV file not found"}), 404
 

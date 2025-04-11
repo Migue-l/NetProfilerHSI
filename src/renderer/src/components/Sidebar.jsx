@@ -139,56 +139,55 @@ const Sidebar = ({
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return showNotification('Wait', 'Please select a file first!');
-
+  
     setSelectedFile(file);
     const formData = new FormData();
     formData.append('file', file);
-
+  
     try {
       const response = await fetch('http://127.0.0.1:5000/api/upload-csv', {
         method: 'POST',
         body: formData
       });
+  
       const result = await response.json();
-
       if (!response.ok) {
         console.error('Error uploading file:', result);
         return showNotification('Error', result.error || 'Failed to upload file');
       }
-
-      showNotification('Success', 'File uploaded successfully');
+  
+      showNotification('Success', 'CSV uploaded successfully');
       await fetchCsvData();
-
+  
       if (batchMode) {
         const batchResp = await fetch('http://127.0.0.1:5000/api/batch-create-cards', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({})
         });
-
+  
         const batchResult = await batchResp.json();
-
         if (!batchResp.ok) {
           return showNotification('Error', batchResult.error || 'Batch creation failed');
         }
-
+  
         showNotification('Success', `Batch card creation complete (${batchResult.created} cards)`);
-
+  
         if (Array.isArray(batchResult.created_titles)) {
           setActiveTab('Editor');
-          for (const name of batchResult.created_titles) {
-            onCsvSelect(name);
-            await wait(3500); // Pause 3.5 seconds per card
-          }
+          batchResult.created_titles.forEach((name, i) => {
+            setTimeout(() => onCsvSelect(name , {isBatch: true }), i * 300); // ⏳ staggered opening
+          });
         }
       }
-
-      setTimeout(() => onRefresh(), 1000);
+  
+      setTimeout(() => onRefresh(), 300);
+  
     } catch (error) {
       console.error('Upload failed:', error);
       showNotification('Error', 'Upload or batch create failed');
     }
-  };
+  };      
 
   const fetchCsvData = async () => {
     try {
@@ -240,7 +239,11 @@ const Sidebar = ({
             ))}
           </select>
           <div className="card-button-container">
-            <button className="new-card-button" onClick={fetchNewCardData}>
+            <button className="new-card-button" 
+            onClick={fetchNewCardData}
+            disabled={batchMode}
+            title={batchMode ? "Disabled in batch mode" : "Create a new card"}
+            >
               <img alt="add" className="plus_sign" src={PlusAdd} /> New Card
             </button>
             <button className="new-deck-button" onClick={fetchNewDeckData}>

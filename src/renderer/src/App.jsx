@@ -97,6 +97,67 @@ function App() {
     };    
   };
 
+  const handleBatchExport = async () => {
+    if (!openCards.length) {
+        return showNotification("No cards", "There are no open cards to export.");
+    }
+
+    const pdf = new jsPDF({ unit: 'pt', format: 'letter' }); // 612x792 pts
+
+    for (let i = 0; i < openCards.length; i++) {
+        const card = openCards[i];
+        const html = renderToString(<CardPreview card={card} />);
+
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'fixed';
+        iframe.style.left = '-9999px';
+        iframe.style.width = '1200px';
+        iframe.style.height = '1600px';
+        document.body.appendChild(iframe);
+
+        const iframeDoc = iframe.contentWindow.document;
+        iframeDoc.open();
+        iframeDoc.write(`
+            <html>
+                <head>
+                    <link rel="stylesheet" href="/src/assets/css/cardpreview.css" />
+                </head>
+                <body>
+                    <div id="pdf-root">${html}</div>
+                </body>
+            </html>
+        `);
+        iframeDoc.close();
+
+        await new Promise((resolve) => {
+            iframe.onload = async () => {
+                const element = iframe.contentDocument.getElementById('pdf-root');
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    useCORS: true
+                });
+
+                const pdfWidth = 612;
+                const pdfHeight = 792;
+                const pxToPt = 72 / 198;
+                const imgWidth = canvas.width * pxToPt;
+                const imgHeight = canvas.height * pxToPt;
+                const xOffset = (pdfWidth - imgWidth) / 2;
+                const yOffset = (pdfHeight - imgHeight) / 2;
+
+                if (i !== 0) pdf.addPage();
+                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', xOffset, yOffset, imgWidth, imgHeight);
+
+                document.body.removeChild(iframe);
+                resolve();
+            };
+        });
+    }
+
+    pdf.save(`BatchExport_${Date.now()}.pdf`);
+};
+
+
 
     const handleRefresh = () => {
         setRefreshKey((prevKey) => prevKey + 1);
@@ -264,7 +325,8 @@ function App() {
                     setActiveCardIndex={setActiveCardIndex}
                     setActiveTab={setActiveTab}
                     onCsvSelect={handleCsvSelect}
-          onExportClick={handleExportPDF}
+                    onExportClick={handleExportPDF}
+                    onBatchExportClick={handleBatchExport}
                     showNotification={showNotification}
                 />
                 <MainContent

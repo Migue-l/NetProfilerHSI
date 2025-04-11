@@ -56,6 +56,7 @@ const Sidebar = ({
   showNotification,
   onCsvSelect,
   onExportClick,
+  onBatchExportClick,
   setActiveTab
 }) => {
   const [cardName, setCardName] = useState('');
@@ -262,6 +263,10 @@ const Sidebar = ({
             <button className="import-export-button" onClick={onExportClick}>
               <img alt="pdf icon" className="pdf-icon" src={PDFicon} /> Export File
             </button>
+            <button className="import-export-button" onClick={onBatchExportClick}>
+              <img alt="pdf icon" className="pdf-icon" src={PDFicon} /> Batch Export
+            </button>
+
           </div>
 
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>

@@ -275,7 +275,7 @@ const Sidebar = ({
               checked={batchMode}
               onChange={(e) => setBatchMode(e.target.checked)}
             />
-            Enable Batch Create
+            Enable Batch Import
           </label>
 
           <input
